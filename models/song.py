@@ -8,6 +8,11 @@ class SongModel(BaseModel):
     artist: str
 
 
+class CreateSongRequest(BaseModel):
+    name: str
+    artist: str
+
+
 class UpdateSongRequest(BaseModel):
     name: Optional[str]
     artist: Optional[str]
