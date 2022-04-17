@@ -1,15 +1,39 @@
-# backend-songs
+# Table of Contents
+* [Setup](#setup)
+* [Environment Variables](#environment-variables)
+* [Docs](#docs)
 
-Run the live server:
+# Setup
+First, create a new python environment.
+```
+$ python3 -m venv venv
+$ source ./venv/bin/activate
+```
 
+Now install all the requirements.
+```
+$ pip install -r requirements.txt
+```
+
+Finally, run the app.
 ```
 $ uvicorn main:app --reload
-
-INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [28720]
-INFO:     Started server process [28722]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
 ```
 
-To read the interactive docs go to: http://127.0.0.1:8000/docs
+If during development you add any dependency, remember to run:
+```
+pip freeze > requirements.txt
+```
+
+# Environment Variables
+Create the `.env` file in the root folder of the project.\
+It must contain the following environment variables.
+```
+MONGODB_USER={Mongo username}
+MONGODB_PASSWD={Mongo password}
+GOOGLE_APPLICATION_CREDENTIALS={Path to Google Credentials}
+```
+
+# Docs
+To read the interactive docs go to:\
+http://127.0.0.1:8000/docs
