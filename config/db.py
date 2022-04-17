@@ -15,4 +15,5 @@ _client = pymongo.MongoClient("mongodb+srv://{}:{}@spotifiuby.8cw9h.mongodb.net/
 conn = _client.prod
 
 # Firebase
+BUCKET = "spotifiuby-3c9fe.appspot.com"
 default_app = firebase_admin.initialize_app()
