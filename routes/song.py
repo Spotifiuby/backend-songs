@@ -6,12 +6,12 @@ from bson import ObjectId
 song_routes = APIRouter()
 
 
-@song_routes.get("/songs", response_model=list[SongModel], tags=["songs"], status_code=status.HTTP_200_OK)
+@song_routes.get("/songs", response_model=list[SongModel], tags=["Songs"], status_code=status.HTTP_200_OK)
 async def get_songs():
     return service.song.get_all()
 
 
-@song_routes.get("/songs/{song_id}", response_model=SongModel, tags=["songs"], status_code=status.HTTP_200_OK)
+@song_routes.get("/songs/{song_id}", response_model=SongModel, tags=["Songs"], status_code=status.HTTP_200_OK)
 async def get_song(song_id: str):
     song = service.song.get(song_id)
     if song is None:
@@ -20,12 +20,12 @@ async def get_song(song_id: str):
     return song
 
 
-@song_routes.post("/songs", response_model=SongModel, tags=["songs"], status_code=status.HTTP_201_CREATED)
+@song_routes.post("/songs", response_model=SongModel, tags=["Songs"], status_code=status.HTTP_201_CREATED)
 async def create_song(song: CreateSongRequest):
     return service.song.create(song)
 
 
-@song_routes.put("/songs/{id}", response_model=SongModel, tags=["songs"])
+@song_routes.put("/songs/{id}", response_model=SongModel, tags=["Songs"])
 async def update_song(song_id: str, song: UpdateSongRequest):
     updated_song = service.song.update(song_id, song)
     if not updated_song:
@@ -34,7 +34,7 @@ async def update_song(song_id: str, song: UpdateSongRequest):
     return updated_song
 
 
-@song_routes.delete("/songs/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["songs"])
+@song_routes.delete("/songs/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Songs"])
 async def delete_song(song_id: str):
     if not ObjectId.is_valid(song_id):
         raise HTTPException(status_code=404, detail=f"id {song_id} is not valid")
