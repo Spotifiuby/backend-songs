@@ -28,10 +28,19 @@ pip freeze > requirements.txt
 # Environment Variables
 Create the `.env` file in the root folder of the project.\
 It must contain the following environment variables.
+
+Development environment:
+```
+GOOGLE_APPLICATION_CREDENTIALS={Path to Google Credentials}
+CURRENT_ENVIRONMENT=development
+```
+
+Production environment:
 ```
 MONGODB_USER={Mongo username}
 MONGODB_PASSWD={Mongo password}
 GOOGLE_APPLICATION_CREDENTIALS={Path to Google Credentials}
+CURRENT_ENVIRONMENT=production
 ```
 
 # Docs

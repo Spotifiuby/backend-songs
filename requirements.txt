@@ -30,6 +30,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pydantic==1.9.0
 pymongo==4.1.0
+pymongo-inmemory==0.2.6
 pyparsing==3.0.8
 python-dotenv==0.20.0
 requests==2.27.1
@@ -41,18 +42,3 @@ typing_extensions==4.1.1
 uritemplate==4.1.1
 urllib3==1.26.9
 uvicorn==0.17.6
-
-pip~=22.0.4
-wheel~=0.37.1
-Jinja2~=3.1.1
-bson~=0.5.10
-websockets~=10.2
-ujson~=4.3.0
-orjson~=3.6.7
-uvloop~=0.16.0
-PyYAML~=5.4.1
-httptools~=0.2.0
-watchgod~=0.8.2
-itsdangerous~=2.1.2
-python-multipart~=0.0.5
-setuptools~=60.10.0
