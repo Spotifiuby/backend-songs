@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, HTTPException
 from service.content import get_song_content
 
 content_routes = APIRouter()
@@ -10,4 +10,4 @@ async def get_content(song_id: str):
     if contents:
         return Response(media_type="audio/mpeg3", content=contents)
     else:
-        Response(status_code=404)
+        raise HTTPException(status_code=404, detail=f"Content not found for song {song_id}")
