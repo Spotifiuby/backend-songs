@@ -6,7 +6,7 @@ content_routes = APIRouter()
 
 
 def _check_valid_song(song):
-    # return song and song["status"] == "active"
+    # return song and "status" in song and song["status"] == "active"
     return True
 
 

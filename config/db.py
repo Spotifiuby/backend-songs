@@ -3,6 +3,7 @@ import pymongo_inmemory
 import os
 from dotenv import load_dotenv
 import firebase_admin
+from google.cloud import storage
 
 load_dotenv()
 
@@ -19,3 +20,5 @@ else:
 # Firebase
 BUCKET = "spotifiuby-3c9fe.appspot.com"
 default_app = firebase_admin.initialize_app()
+storage_client = storage.Client()
+bucket = storage_client.bucket(BUCKET)
