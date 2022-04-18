@@ -4,6 +4,7 @@
 * [Setup](#setup)
 * [Environment Variables](#environment-variables)
 * [Tests](#tests)
+* [Deploy](#deploy)
 * [Docs](#docs)
 
 # Setup
@@ -50,6 +51,18 @@ For tests and coverage run the following.
 ```
 coverage run -m pytest
 coverage report
+```
+
+# Deploy
+## Manual Deploy
+After any change, run.
+```
+git push heroku main
+```
+
+And get the server url with
+```
+heroku info
 ```
 
 # Docs

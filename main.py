@@ -1,9 +1,8 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from docs import tags_metadata
 from routes.song import song_routes
 from routes.content import content_routes
-
 
 app = FastAPI(
     title="Songs backend for Spotifiuby",
@@ -14,6 +13,12 @@ app = FastAPI(
 
 app.include_router(song_routes)
 app.include_router(content_routes)
+
+
+@app.get("/")
+def ping():
+    return Response(status_code=200)
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host='0.0.0.0', port=8000, reload=True)
