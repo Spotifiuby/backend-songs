@@ -31,7 +31,6 @@ It must contain the following environment variables.
 
 Development environment:
 ```
-GOOGLE_APPLICATION_CREDENTIALS={Path to Google Credentials}
 CURRENT_ENVIRONMENT=development
 ```
 

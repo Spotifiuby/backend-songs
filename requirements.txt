@@ -1,5 +1,6 @@
 anyio==3.5.0
 asgiref==3.5.0
+attrs==21.4.0
 CacheControl==0.12.10
 cachetools==5.0.0
 certifi==2021.10.8
@@ -23,15 +24,20 @@ grpcio-status==1.44.0
 h11==0.13.0
 httplib2==0.20.4
 idna==3.3
+iniconfig==1.1.1
 msgpack==1.0.3
+packaging==21.3
+pluggy==1.0.0
 proto-plus==1.20.3
 protobuf==3.20.0
+py==1.11.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pydantic==1.9.0
 pymongo==4.1.0
 pymongo-inmemory==0.2.6
 pyparsing==3.0.8
+pytest==7.1.1
 python-dotenv==0.20.0
 python-multipart==0.0.5
 requests==2.27.1
@@ -39,6 +45,7 @@ rsa==4.8
 six==1.16.0
 sniffio==1.2.0
 starlette==0.17.1
+tomli==2.0.1
 typing_extensions==4.1.1
 uritemplate==4.1.1
 urllib3==1.26.9
