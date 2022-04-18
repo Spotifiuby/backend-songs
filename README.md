@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/Spotifiuby/backend-songs/branch/main/graph/badge.svg?token=HQVLP3H2XY)](https://codecov.io/gh/Spotifiuby/backend-songs)
+
 # Table of Contents
 * [Setup](#setup)
 * [Environment Variables](#environment-variables)
