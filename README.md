@@ -1,6 +1,7 @@
 # Table of Contents
 * [Setup](#setup)
 * [Environment Variables](#environment-variables)
+* [Tests](#tests)
 * [Docs](#docs)
 
 # Setup
@@ -40,6 +41,13 @@ MONGODB_USER={Mongo username}
 MONGODB_PASSWD={Mongo password}
 GOOGLE_APPLICATION_CREDENTIALS={Path to Google Credentials}
 CURRENT_ENVIRONMENT=production
+```
+
+# Tests
+For tests and coverage run the following.
+```
+coverage run -m pytest
+coverage report
 ```
 
 # Docs
