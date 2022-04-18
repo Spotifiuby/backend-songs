@@ -1,6 +1,6 @@
 name: Spotifiuby CI
 ...
-on: [ push, pull_request ]
+on: push
 jobs:
   run:
     name: Testing and Linting
