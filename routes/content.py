@@ -12,9 +12,9 @@ def _check_valid_song(song):
 
 @content_routes.get("/songs/{song_id}/content", response_class=Response, tags=["Content"])
 async def get_content(song_id: str):
-    song = service.song.get(song_id)
-    if not _check_valid_song(song):
-        raise HTTPException(status_code=400, detail=f"Song not available {song_id}")
+    # song = service.song.get(song_id)
+    # if not _check_valid_song(song):
+        # raise HTTPException(status_code=400, detail=f"Song not available {song_id}")
 
     contents = get_song_content(song_id)
     if contents:
