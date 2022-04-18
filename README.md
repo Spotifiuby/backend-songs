@@ -65,6 +65,17 @@ And get the server url with
 heroku info
 ```
 
+## SSH
+Use Heroku Exec to connect to a dyno.
+```
+heroku ps:exec
+```
+
+Or
+```
+heroku ps:exec --dyno=web.2
+```
+
 # Docs
 To read the interactive docs go to:\
 http://127.0.0.1:8000/docs
