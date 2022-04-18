@@ -1,5 +1,4 @@
 name: Spotifiuby CI
-...
 on:
   pull_request:
     types:
