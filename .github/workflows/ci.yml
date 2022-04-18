@@ -32,5 +32,4 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage/
-          files: ./coverage.xml
           flags: integration
