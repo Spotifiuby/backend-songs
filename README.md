@@ -54,6 +54,12 @@ coverage report
 ```
 
 # Deploy
+## Setup
+Create heroku remote.
+```
+heroku git:remote -a spotifiuby-backend-songs
+```
+
 ## Manual Deploy
 After any change, run.
 ```
