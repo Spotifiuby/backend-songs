@@ -8,14 +8,15 @@ app = FastAPI(
     title="Songs backend for Spotifiuby",
     description="REST API using FastAPI, MongoDB and Firebase",
     version="0.0.1",
-    openapi_tags=tags_metadata
+    openapi_tags=tags_metadata,
+    swagger_ui_parameters={"defaultModelsExpandDepth": -1}
 )
 
 app.include_router(song_routes)
 app.include_router(content_routes)
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def ping():
     return Response(status_code=200)
 
