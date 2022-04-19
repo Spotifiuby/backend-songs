@@ -19,7 +19,7 @@ async def get_content(song_id: str):
 
     contents = get_song_content(song_id)
     if contents:
-        return Response(media_type="audio/mpeg3", content=contents)
+        return Response(media_type="audio/mpeg", content=contents)
     else:
         raise HTTPException(status_code=404, detail=f"Content not found for song {song_id}")
 

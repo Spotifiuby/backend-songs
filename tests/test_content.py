@@ -33,7 +33,7 @@ def test_get_content(mongo_test):
     response = client.get("/songs/625c9dcd232be00e5f827f7b/content")
     assert response.status_code == 200
     assert response.content == b"content"
-    assert response.headers["content-type"] == "audio/mpeg3"
+    assert response.headers["content-type"] == "audio/mpeg"
 
 
 def test_create_and_get_song_and_content(mongo_test):
@@ -50,4 +50,4 @@ def test_create_and_get_song_and_content(mongo_test):
     response = client.get(f"/songs/{song_id}/content")
     assert response.status_code == 200
     assert response.content == b"test-content"
-    assert response.headers["content-type"] == "audio/mpeg3"
+    assert response.headers["content-type"] == "audio/mpeg"
