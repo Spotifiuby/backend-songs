@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Response, HTTPException, UploadFile
 from service.content import get_song_content, upload_song_content
 import service.song
+from http import HTTPStatus
 
 content_routes = APIRouter()
 
@@ -14,7 +15,7 @@ def _check_valid_song(song):
 async def get_content(song_id: str):
     # song = service.song.get(song_id)
     # if not _check_valid_song(song):
-        # raise HTTPException(status_code=400, detail=f"Song not available {song_id}")
+    #   raise HTTPException(status_code=400, detail=f"Song not available {song_id}")
 
     contents = get_song_content(song_id)
     if contents:
@@ -25,8 +26,9 @@ async def get_content(song_id: str):
 
 @content_routes.post("/songs/{song_id}/content", response_class=Response, tags=["Content"])
 async def post_content(song_id: str, file: UploadFile):
-    song = service.song.get(song_id)
-    if not _check_valid_song(song):
-        raise HTTPException(status_code=400, detail=f"Song not available {song_id}")
+    # song = service.song.get(song_id)
+    # if not _check_valid_song(song):
+    #     raise HTTPException(status_code=400, detail=f"Song not available {song_id}")
 
     upload_song_content(song_id, await file.read())
+    return Response(status_code=HTTPStatus.CREATED)
