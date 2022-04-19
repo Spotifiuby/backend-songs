@@ -1,6 +1,7 @@
 from bson import ObjectId
 import pymongo
 from config.db import conn
+from models.song import StatusEnum
 
 
 def _song_entity(song) -> dict:
@@ -21,7 +22,9 @@ def get(song_id: str):
 
 
 def create(song):
-    r = conn.songs.insert_one(song.dict())
+    song_dict = song.dict()
+    song_dict["status"] = StatusEnum.not_uploaded
+    r = conn.songs.insert_one(song_dict)
     mongo_song = conn.songs.find_one({"_id": r.inserted_id})
 
     return _song_entity(mongo_song)

@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Response, HTTPException, UploadFile
+from fastapi import APIRouter, Response, HTTPException, UploadFile, status
 from service.content import get_song_content, upload_song_content
 import service.song
-from http import HTTPStatus
 
 content_routes = APIRouter()
 
@@ -21,7 +20,7 @@ async def get_content(song_id: str):
     if contents:
         return Response(media_type="audio/mpeg", content=contents)
     else:
-        raise HTTPException(status_code=404, detail=f"Content not found for song {song_id}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Content not found for song {song_id}")
 
 
 @content_routes.post("/songs/{song_id}/content", response_class=Response, tags=["Content"])
@@ -31,4 +30,4 @@ async def post_content(song_id: str, file: UploadFile):
     #     raise HTTPException(status_code=400, detail=f"Song not available {song_id}")
 
     upload_song_content(song_id, await file.read())
-    return Response(status_code=HTTPStatus.CREATED)
+    return Response(status_code=status.HTTP_201_CREATED)
