@@ -10,8 +10,8 @@ load_dotenv()
 # Mongo
 if os.getenv("CURRENT_ENVIRONMENT") == "production":
     _client = pymongo.MongoClient(
-        "mongodb+srv://{}:{}@spotifiuby.8cw9h.mongodb.net/myFirstDatabase?retryWrites=true&w""=majority".format(
-            os.getenv("MONGODB_USER"), os.getenv("MONGODB_PASSWD")))
+        f"mongodb+srv://{os.getenv('MONGODB_USER')}:{os.getenv('MONGODB_PASSWD')}@backend-songs.yhk0y.mongodb.net"
+        f"/backend-songs?retryWrites=true&w=majority")
     conn = _client.prod
 else:
     _client = pymongo_inmemory.MongoClient()
