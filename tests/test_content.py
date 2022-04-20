@@ -40,10 +40,10 @@ def test_get_content_song_not_found(mongo_test_empty):
     assert response.json() == {'detail': f'Song not found {SONG_NOT_FOUND_ID}'}
 
 
-def test_get_content_song_not_available(mongo_test_empty):
+def test_get_content_song_not_available(mongo_test):
     response = client.get(f"/songs/{SONG_NOT_AVAILABLE_ID}/content")
-    assert response.status_code == 404
-    assert response.json() == {'detail': f'Song not found {SONG_NOT_AVAILABLE_ID}'}
+    assert response.status_code == 400
+    assert response.json() == {'detail': f'Song not available {SONG_NOT_AVAILABLE_ID}'}
 
 
 def test_create_content(mongo_test):
