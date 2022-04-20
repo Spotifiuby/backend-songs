@@ -1,26 +1,36 @@
-import io
-
-import pytest
-from main import app
 from fastapi.testclient import TestClient
+from bson import ObjectId
+from main import app
 from config.db import conn
 from config.db import bucket
+import io
+import pytest
 
 client = TestClient(app)
 
 
 @pytest.fixture()
-def mongo_test():
+def mongo_test_empty():
     conn.songs.delete_many({})
-    conn.songs.insert_one({"_id": "625c9dcd232be00e5f827f7b", "status": "active"})
-    conn.songs.insert_one({"_id": "625c9dcd232be00e5f827f7c", "status": "active"})
+
+
+@pytest.fixture()
+def mongo_test(mongo_test_empty):
+    conn.songs.insert_one({"_id": ObjectId("625c9dcd232be00e5f827f7b"), "status": "active"})
+    conn.songs.insert_one({"_id": ObjectId("625c9dcd232be00e5f827f7c"), "status": "active"})
     bucket.blob("625c9dcd232be00e5f827f7c/625c9dcd232be00e5f827f7c.mp3").upload_from_string("content")
 
 
 def test_get_content_not_found(mongo_test):
     response = client.get("/songs/625c9dcd232be00e5f827f7b/content")
     assert response.status_code == 404
-    assert response.json() == {'detail': 'Content not found for song 625c9dcd232be00e5f827f7b'}
+    assert response.json() == {'detail': 'Content not found for Song 625c9dcd232be00e5f827f7b'}
+
+
+def test_get_content_song_not_found(mongo_test_empty):
+    response = client.get("/songs/625c9dcd232be00e5f827f7b/content")
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Song not found 625c9dcd232be00e5f827f7b'}
 
 
 def test_create_content(mongo_test):
@@ -51,3 +61,7 @@ def test_create_and_get_song_and_content(mongo_test):
     assert response.status_code == 200
     assert response.content == b"test-content"
     assert response.headers["content-type"] == "audio/mpeg"
+
+    response = client.get(f"/songs/{song_id}")
+    assert response.status_code == 200
+    assert response.json() == {'artist': 'test', 'id': f'{song_id}', 'name': 'test', 'status': 'active'}

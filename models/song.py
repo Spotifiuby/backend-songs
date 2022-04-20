@@ -15,6 +15,10 @@ class SongModel(BaseModel):
     artist: str
     status: StatusEnum
 
+    @staticmethod
+    def is_active(song: dict):
+        return "status" in song and song["status"] in ACTIVE_STATUSES
+
 
 class CreateSongRequest(BaseModel):
     name: str
@@ -24,3 +28,7 @@ class CreateSongRequest(BaseModel):
 class UpdateSongRequest(BaseModel):
     name: Optional[str]
     artist: Optional[str]
+
+
+# Definitions
+ACTIVE_STATUSES = [StatusEnum.not_uploaded, StatusEnum.active]

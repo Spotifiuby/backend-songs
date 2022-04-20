@@ -43,3 +43,12 @@ def update(song_id, song):
 def delete(song_id):
     r = conn.songs.delete_one({"_id": ObjectId(song_id)})
     return r.deleted_count > 0
+
+
+def activate_song(song_id):
+    updated_song = conn.songs.find_one_and_update(
+        {"_id": ObjectId(song_id)},
+        {"$set": {"status": StatusEnum.active}},
+        return_document=pymongo.ReturnDocument.AFTER
+    )
+    return _song_entity(updated_song)
