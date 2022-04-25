@@ -12,7 +12,7 @@ class StatusEnum(str, Enum):
 class SongModel(BaseModel):
     id: str
     name: str
-    artist: str
+    artists: list[str]
     status: StatusEnum
 
     @staticmethod
@@ -22,12 +22,12 @@ class SongModel(BaseModel):
 
 class CreateSongRequest(BaseModel):
     name: str
-    artist: str
+    artists: list[str]
 
 
 class UpdateSongRequest(BaseModel):
     name: Optional[str]
-    artist: Optional[str]
+    artists: Optional[list]
 
 
 # Definitions
