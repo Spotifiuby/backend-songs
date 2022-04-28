@@ -1,6 +1,7 @@
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 from pydantic import BaseModel
+import datetime
 
 
 class StatusEnum(str, Enum):
@@ -14,6 +15,8 @@ class SongModel(BaseModel):
     name: str
     artists: list[str]
     status: StatusEnum
+    date_created: datetime.datetime
+    date_uploaded: Union[datetime.datetime, None]
 
     @staticmethod
     def is_active(song: dict):

@@ -1,5 +1,6 @@
 from bson import ObjectId
 import pymongo
+import datetime
 from config.db import conn
 from models.song import StatusEnum
 
@@ -24,6 +25,8 @@ def get(song_id: str):
 def create(song):
     song_dict = song.dict()
     song_dict["status"] = StatusEnum.not_uploaded
+    song_dict["date_created"] = datetime.datetime.today()
+    song_dict["date_uploaded"] = None
     r = conn.songs.insert_one(song_dict)
     mongo_song = conn.songs.find_one({"_id": r.inserted_id})
 
@@ -48,7 +51,12 @@ def delete(song_id):
 def activate_song(song_id):
     updated_song = conn.songs.find_one_and_update(
         {"_id": ObjectId(song_id)},
-        {"$set": {"status": StatusEnum.active}},
+        {
+            "$set": {
+                "status": StatusEnum.active,
+                "date_uploaded": datetime.datetime.today()
+            }
+        },
         return_document=pymongo.ReturnDocument.AFTER
     )
     return _song_entity(updated_song)

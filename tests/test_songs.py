@@ -14,8 +14,12 @@ def mongo_test_empty():
 
 @pytest.fixture()
 def mongo_test(mongo_test_empty):
-    conn.songs.insert_one(
-        {"_id": ObjectId("625c9dcd232be00e5f827f6a"), "status": "active", "name": "test", "artists": ["test"]})
+    conn.songs.insert_one({
+        "_id": ObjectId("625c9dcd232be00e5f827f6a"),
+        "status": "active",
+        "name": "test",
+        "artists": ["test"]
+    })
 
 
 def test_get_all_songs_empty(mongo_test_empty):
