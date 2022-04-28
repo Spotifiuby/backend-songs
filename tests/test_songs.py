@@ -1,5 +1,6 @@
 import pytest
 from bson import ObjectId
+import datetime
 from main import app
 from fastapi.testclient import TestClient
 from config.db import conn
@@ -18,7 +19,9 @@ def mongo_test(mongo_test_empty):
         "_id": ObjectId("625c9dcd232be00e5f827f6a"),
         "status": "active",
         "name": "test",
-        "artists": ["test"]
+        "artists": ["test"],
+        "date_created": datetime.datetime.today(),
+        "date_uploaded": None
     })
 
 
@@ -52,5 +55,8 @@ def test_get_song_not_found(mongo_test):
 def test_get_song(mongo_test):
     response = client.get("/songs/625c9dcd232be00e5f827f6a")
     assert response.status_code == 200
-    assert response.json() == {'artists': ['test'], 'id': '625c9dcd232be00e5f827f6a', 'name': 'test',
-                               'status': 'active'}
+    json_response = response.json()
+    assert json_response["date_created"]
+    del json_response["date_created"]
+    assert json_response == {'artists': ['test'], 'id': '625c9dcd232be00e5f827f6a',
+                             'name': 'test', 'status': 'active', "date_uploaded": None}
