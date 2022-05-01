@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, Response
+from fastapi.middleware.cors import CORSMiddleware
 from docs import tags_metadata
 from routes.song import song_routes
 from routes.content import content_routes
@@ -11,6 +12,19 @@ app = FastAPI(
     openapi_tags=tags_metadata,
     swagger_ui_parameters={"defaultModelsExpandDepth": -1}
 )
+
+
+# TODO: En producción no se podría dejar así
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(song_routes)
 app.include_router(content_routes)
