@@ -26,7 +26,7 @@ async def create_album(album: CreateAlbumRequest):
     return service.album.create(album)
 
 
-@album_routes.put("/albums/{id}/songs", response_model=AlbumModel, tags=["Albums"])
+@album_routes.put("/albums/{album_id}/songs", response_model=AlbumModel, tags=["Albums"])
 async def add_song(album_id: str, song: str):
     _check_valid_album_id(album_id)
     updated_album = service.album.add_song(album_id, song)
@@ -36,7 +36,7 @@ async def add_song(album_id: str, song: str):
     return updated_album
 
 
-@album_routes.put("/albums/{id}/artists", response_model=AlbumModel, tags=["Albums"])
+@album_routes.put("/albums/{album_id}/artists", response_model=AlbumModel, tags=["Albums"])
 async def add_artist(album_id: str, artist: str):
     _check_valid_album_id(album_id)
     updated_album = service.album.add_artist(album_id, artist)
@@ -46,7 +46,7 @@ async def add_artist(album_id: str, artist: str):
     return updated_album
 
 
-@album_routes.put("/albums/{id}", response_model=AlbumModel, tags=["Albums"])
+@album_routes.put("/albums/{album_id}", response_model=AlbumModel, tags=["Albums"])
 async def update_album(album_id: str, album: UpdateAlbumRequest):
     _check_valid_album_id(album_id)
     updated_album = service.album.update(album_id, album)
@@ -56,7 +56,7 @@ async def update_album(album_id: str, album: UpdateAlbumRequest):
     return updated_album
 
 
-@album_routes.delete("/albums/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Albums"])
+@album_routes.delete("/albums/{album_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Albums"])
 async def delete_album(album_id: str):
     _check_valid_album_id(album_id)
     r = service.album.delete(album_id)
