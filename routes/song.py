@@ -26,7 +26,7 @@ async def create_song(song: CreateSongRequest):
     return service.song.create(song)
 
 
-@song_routes.put("/songs/{id}", response_model=SongModel, tags=["Songs"])
+@song_routes.put("/songs/{song_id}", response_model=SongModel, tags=["Songs"])
 async def update_song(song_id: str, song: UpdateSongRequest):
     _check_valid_song_id(song_id)
     updated_song = service.song.update(song_id, song)
@@ -36,7 +36,7 @@ async def update_song(song_id: str, song: UpdateSongRequest):
     return updated_song
 
 
-@song_routes.delete("/songs/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Songs"])
+@song_routes.delete("/songs/{song_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Songs"])
 async def delete_song(song_id: str):
     _check_valid_song_id(song_id)
     r = service.song.delete(song_id)

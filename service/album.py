@@ -5,6 +5,8 @@ from config.db import conn
 
 
 def _album_entity(album) -> dict:
+    if not album:
+        return album
     album["id"] = str(album.pop("_id"))
     return album
 
