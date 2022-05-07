@@ -6,6 +6,8 @@ from models.song import StatusEnum
 
 
 def _song_entity(song) -> dict:
+    if not song:
+        return song
     song["id"] = str(song.pop("_id"))
     return song
 

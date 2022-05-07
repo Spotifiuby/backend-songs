@@ -3,6 +3,7 @@ from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from docs import tags_metadata
 from routes.song import song_routes
+from routes.album import album_routes
 from routes.content import content_routes
 
 app = FastAPI(
@@ -27,6 +28,7 @@ app.add_middleware(
 
 
 app.include_router(song_routes)
+app.include_router(album_routes)
 app.include_router(content_routes)
 
 
