@@ -8,6 +8,7 @@ class AlbumModel(BaseModel):
     name: str
     artists: list[str]
     songs: list[str]
+    year: int
     date_created: datetime.datetime
 
 
@@ -15,10 +16,12 @@ class CreateAlbumRequest(BaseModel):
     name: str
     artists: list[str]
     songs: list[str]
+    year: int
 
 
 class UpdateAlbumRequest(BaseModel):
     name: Optional[str]
     artists: Optional[list]
-    songs: list[str]
+    songs: Optional[list[str]]
+    year: Optional[int]
 
