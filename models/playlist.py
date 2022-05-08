@@ -19,6 +19,6 @@ class CreatePlaylistRequest(BaseModel):
 
 class UpdatePlaylistRequest(BaseModel):
     name: Optional[str]
-    owner: str
-    songs: list[str]
+    owner: Optional[str]
+    songs: Optional[list[str]]
 
