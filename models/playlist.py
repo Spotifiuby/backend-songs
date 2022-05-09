@@ -3,25 +3,22 @@ from pydantic import BaseModel
 import datetime
 
 
-class AlbumModel(BaseModel):
+class PlaylistModel(BaseModel):
     id: str
     name: str
-    artists: list[str]
+    owner: str
     songs: list[str]
-    year: int
     date_created: datetime.datetime
 
 
-class CreateAlbumRequest(BaseModel):
+class CreatePlaylistRequest(BaseModel):
     name: str
-    artists: list[str]
+    owner: str
     songs: list[str]
-    year: int
 
 
-class UpdateAlbumRequest(BaseModel):
+class UpdatePlaylistRequest(BaseModel):
     name: Optional[str]
-    artists: Optional[list]
+    owner: Optional[str]
     songs: Optional[list[str]]
-    year: Optional[int]
 

@@ -17,6 +17,7 @@ TEST_ALBUM = {
         "test_song_1",
         "test_song_2"
     ],
+    "year": 2022,
     "date_created": datetime.datetime.today(),
 }
 
@@ -38,17 +39,18 @@ def test_get_all_albums_empty(mongo_test_empty):
 
 
 def test_create_album(mongo_test):
-    test_album = {"name": "test", "artists": ["test"], "songs": ["song_1", "song_2"]}
+    test_album = {"name": "test", "artists": ["test"], "songs": ["song_1", "song_2"], "year": 1990}
     response = client.post("/albums", json=test_album)
     assert response.status_code == 201
     assert len(response.json()) > 0
     assert response.json()["name"] == test_album["name"]
     assert response.json()["artists"] == test_album["artists"]
     assert response.json()["songs"] == test_album["songs"]
+    assert response.json()["year"] == test_album["year"]
 
 
 def test_get_all_albums(mongo_test_empty):
-    test_album = {"name": "test", "artists": ["test"], "songs": ["song_1", "song_2"]}
+    test_album = {"name": "test", "artists": ["test"], "songs": ["song_1", "song_2"], "year": 1990}
     for i in range(10):
         client.post("/albums", json=test_album)
     response = client.get("/albums")
@@ -108,17 +110,18 @@ def test_add_artist_to_album_not_found_fails(mongo_test_empty):
 
 
 def test_update_album(mongo_test):
-    updated_album = {"name": "updated_name", "artists": ["updated_artist"], "songs": ["updated_song"]}
+    updated_album = {"name": "updated_name", "artists": ["updated_artist"], "songs": ["updated_song"], "year": 2010}
     response = client.put("/albums/{}".format(str(TEST_ALBUM["_id"])), json=updated_album)
     assert response.status_code == 200
     assert len(response.json()) > 0
     assert response.json()["name"] == updated_album["name"]
     assert response.json()["artists"] == updated_album["artists"]
     assert response.json()["songs"] == updated_album["songs"]
+    assert response.json()["year"] == updated_album["year"]
 
 
 def test_update_album_not_found_fails(mongo_test_empty):
-    updated_album = {"name": "updated_name", "artists": ["updated_artist"], "songs": ["updated_song"]}
+    updated_album = {"name": "updated_name", "artists": ["updated_artist"], "songs": ["updated_song"], "year": 2010}
     response = client.put("/albums/{}".format(str(TEST_ALBUM["_id"])), json=updated_album)
     assert response.status_code == 404
 
