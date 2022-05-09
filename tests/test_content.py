@@ -23,7 +23,7 @@ def mongo_test_empty():
 @pytest.fixture()
 def mongo_test(mongo_test_empty):
     conn.songs.insert_one({"_id": ObjectId(SONG_NOT_AVAILABLE_ID), "status": StatusEnum.inactive})
-    conn.songs.insert_one({"_id": ObjectId(CONTENT_NOT_FOUND_ID), "status": StatusEnum.active})
+    conn.songs.insert_one({"_id": ObjectId(CONTENT_NOT_FOUND_ID), "status": StatusEnum.not_uploaded})
     conn.songs.insert_one({"_id": ObjectId(f"{SONG_AND_CONTENT_OK}"), "status": StatusEnum.active})
     bucket.blob(f"{SONG_AND_CONTENT_OK}/{SONG_AND_CONTENT_OK}.mp3").upload_from_string("content")
 
@@ -50,6 +50,7 @@ def test_create_content(mongo_test):
     f = io.StringIO("content")
     response = client.post(f"/songs/{CONTENT_NOT_FOUND_ID}/content", files={"file": ("file.mp3", f)})
     assert response.status_code == 201
+    assert conn.songs.find_one({"_id": ObjectId(CONTENT_NOT_FOUND_ID)})["status"] == "active"
 
 
 def test_get_content(mongo_test):

@@ -7,6 +7,33 @@ from config.db import conn
 
 client = TestClient(app)
 
+TEST_SONG_1 = {
+    "_id": ObjectId("625c9dcd232be00e5f827f6e"),
+    "status": "active",
+    "name": "test",
+    "artists": ["test"],
+    "date_created": datetime.datetime.today(),
+    "date_uploaded": None
+}
+
+TEST_SONG_2 = {
+    "_id": ObjectId("625c9dcd232be00e5f827f6f"),
+    "status": "active",
+    "name": "test",
+    "artists": ["test"],
+    "date_created": datetime.datetime.today(),
+    "date_uploaded": None
+}
+
+TEST_SONG_3 = {
+    "_id": ObjectId("625c9dcd232be00e5f827f7a"),
+    "status": "active",
+    "name": "test",
+    "artists": ["test"],
+    "date_created": datetime.datetime.today(),
+    "date_uploaded": None
+}
+
 TEST_ALBUM = {
     "_id": ObjectId("625c9dcd232be00e5f827f6a"),
     "name": "test_name",
@@ -14,8 +41,8 @@ TEST_ALBUM = {
         "test_artist"
     ],
     "songs": [
-        "test_song_1",
-        "test_song_2"
+        str(TEST_SONG_1["_id"]),
+        str(TEST_SONG_2["_id"])
     ],
     "year": 2022,
     "date_created": datetime.datetime.today(),
@@ -25,10 +52,18 @@ TEST_ALBUM = {
 @pytest.fixture()
 def mongo_test_empty():
     conn.albums.delete_many({})
+    conn.songs.delete_many({})
 
 
 @pytest.fixture()
-def mongo_test(mongo_test_empty):
+def mongo_test_songs(mongo_test_empty):
+    conn.songs.insert_one(TEST_SONG_1)
+    conn.songs.insert_one(TEST_SONG_2)
+    conn.songs.insert_one(TEST_SONG_3)
+
+
+@pytest.fixture()
+def mongo_test(mongo_test_empty, mongo_test_songs):
     conn.albums.insert_one(TEST_ALBUM)
 
 
@@ -39,7 +74,7 @@ def test_get_all_albums_empty(mongo_test_empty):
 
 
 def test_create_album(mongo_test):
-    test_album = {"name": "test", "artists": ["test"], "songs": ["song_1", "song_2"], "year": 1990}
+    test_album = {"name": "test", "artists": ["test"], "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])], "year": 1990}
     response = client.post("/albums", json=test_album)
     assert response.status_code == 201
     assert len(response.json()) > 0
@@ -49,8 +84,8 @@ def test_create_album(mongo_test):
     assert response.json()["year"] == test_album["year"]
 
 
-def test_get_all_albums(mongo_test_empty):
-    test_album = {"name": "test", "artists": ["test"], "songs": ["song_1", "song_2"], "year": 1990}
+def test_get_all_albums(mongo_test_songs):
+    test_album = {"name": "test", "artists": ["test"], "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])], "year": 1990}
     for i in range(10):
         client.post("/albums", json=test_album)
     response = client.get("/albums")
@@ -78,7 +113,7 @@ def test_get_album(mongo_test):
 
 
 def test_add_song(mongo_test):
-    new_song = "new_song"
+    new_song = str(TEST_SONG_3["_id"])
     response = client.put("/albums/{}/songs".format(str(TEST_ALBUM["_id"])), params={'song': new_song})
     assert response.status_code == 200
     json_response = response.json()
@@ -88,7 +123,7 @@ def test_add_song(mongo_test):
 
 
 def test_add_song_to_album_not_found_fails(mongo_test_empty):
-    new_song = "new_song"
+    new_song = str(TEST_SONG_3["_id"])
     response = client.put("/albums/{}/songs".format(str(TEST_ALBUM["_id"])), params={'song': new_song})
     assert response.status_code == 404
 
@@ -110,7 +145,7 @@ def test_add_artist_to_album_not_found_fails(mongo_test_empty):
 
 
 def test_update_album(mongo_test):
-    updated_album = {"name": "updated_name", "artists": ["updated_artist"], "songs": ["updated_song"], "year": 2010}
+    updated_album = {"name": "updated_name", "artists": ["updated_artist"], "songs": [str(TEST_SONG_3["_id"])], "year": 2010}
     response = client.put("/albums/{}".format(str(TEST_ALBUM["_id"])), json=updated_album)
     assert response.status_code == 200
     assert len(response.json()) > 0
@@ -121,7 +156,7 @@ def test_update_album(mongo_test):
 
 
 def test_update_album_not_found_fails(mongo_test_empty):
-    updated_album = {"name": "updated_name", "artists": ["updated_artist"], "songs": ["updated_song"], "year": 2010}
+    updated_album = {"name": "updated_name", "artists": ["updated_artist"], "songs": [str(TEST_SONG_3["_id"])], "year": 2010}
     response = client.put("/albums/{}".format(str(TEST_ALBUM["_id"])), json=updated_album)
     assert response.status_code == 404
 
