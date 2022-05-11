@@ -6,7 +6,11 @@ from routes.song import song_routes
 from routes.content import content_routes
 from routes.album import album_routes
 from routes.playlist import playlist_routes
+from logging.config import dictConfig
+from config.log_conf import log_config
 
+
+dictConfig(log_config)
 app = FastAPI(
     title="Songs backend for Spotifiuby",
     description="REST API using FastAPI, MongoDB and Firebase",
