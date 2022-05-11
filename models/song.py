@@ -14,6 +14,7 @@ class SongModel(BaseModel):
     id: str
     name: str
     artists: list[str]
+    genre: str
     status: StatusEnum
     date_created: datetime.datetime
     date_uploaded: Union[datetime.datetime, None]
@@ -26,11 +27,13 @@ class SongModel(BaseModel):
 class CreateSongRequest(BaseModel):
     name: str
     artists: list[str]
+    genre: str
 
 
 class UpdateSongRequest(BaseModel):
     name: Optional[str]
     artists: Optional[list]
+    genre: Optional[str]
 
 
 # Definitions

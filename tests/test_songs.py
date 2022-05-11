@@ -10,6 +10,7 @@ TEST_SONG = {
     "status": "active",
     "name": "test",
     "artists": ["test"],
+    "genre": "rock",
     "date_created": datetime.datetime.today(),
     "date_uploaded": None
 }
@@ -34,15 +35,17 @@ def test_get_all_songs_empty(mongo_test_empty):
 
 
 def test_create_song(mongo_test):
-    test_song = {"name": "test", "artists": ["test"]}
+    test_song = {"name": "test", "artists": ["test"], "genre": "rock"}
     response = client.post("/songs", json=test_song)
     assert response.status_code == 201
     assert len(response.json()) > 0
     response.json()["name"] = test_song["name"]
+    response.json()["artists"] = test_song["artists"]
+    response.json()["genre"] = test_song["genre"]
 
 
 def test_get_all_songs(mongo_test_empty):
-    test_song = {"name": "test", "artists": ["test"]}
+    test_song = {"name": "test", "artists": ["test"], "genre": "rock"}
     for i in range(10):
         client.post("/songs", json=test_song)
     response = client.get("/songs")
