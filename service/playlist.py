@@ -11,16 +11,22 @@ def _playlist_entity(playlist) -> dict:
     return playlist
 
 
-def get_all():
-    return [_playlist_entity(playlist) for playlist in conn.playlists.find()]
+def _regex_query(field, q):
+    return {field: {'$regex': q, '$options': 'i'}}
+
+
+def find(q):
+    if not q:
+        mongo_query = {}
+    else:
+        fields = ['name', 'owner']
+        mongo_query = {'$or': [_regex_query(field, q) for field in fields]}
+    return [_playlist_entity(song) for song in conn.playlists.find(mongo_query)]
 
 
 def get(playlist_id: str):
     playlist = conn.playlists.find_one({"_id": ObjectId(playlist_id)})
-    if playlist:
-        return _playlist_entity(playlist)
-
-    return None
+    return _playlist_entity(playlist)
 
 
 def create(playlist):

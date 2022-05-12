@@ -27,10 +27,7 @@ def find(q):
 
 def get(song_id: str):
     song = conn.songs.find_one({"_id": ObjectId(song_id)})
-    if song:
-        return _song_entity(song)
-
-    return None
+    return _song_entity(song)
 
 
 def create(song):

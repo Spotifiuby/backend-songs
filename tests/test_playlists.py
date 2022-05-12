@@ -89,11 +89,34 @@ def test_get_all_playlists(mongo_test_songs):
     assert len(response.json()) == 10
 
 
-def test_get_playlist_not_found(mongo_test_full):
-    _id = "625c9dcd232be00e5f827f7b"
-    response = client.get("/playlists/{}".format(_id))
+def test_find_playlist(mongo_test_songs):
+    test_playlist1 = {
+        "name": "rock nacional",
+        "owner": "owner1",
+        "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])]
+    }
+    test_playlist2 = {
+        "name": "punk rock",
+        "owner": "owner2",
+        "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])]
+    }
+    client.post("/playlists", json=test_playlist1)
+    client.post("/playlists", json=test_playlist2)
+    response1 = client.get("/playlists", params="q=rock")
+    assert len(response1.json()) == 2
+    response2 = client.get("/playlists", params="q=nacional")
+    assert len(response2.json()) == 1
+    response2 = client.get("/playlists", params="q=punk")
+    assert len(response2.json()) == 1
+    response2 = client.get("/playlists", params="q=jazz")
+    assert len(response2.json()) == 0
+
+
+def test_get_playlist_not_found(mongo_test_songs):
+    playlist_id = "625c9dcd232be00e5f827f7b"
+    response = client.get("/playlists/{}".format(playlist_id))
     assert response.status_code == 404
-    assert response.json() == {"detail": "Playlist {} not found".format(_id)}
+    assert response.json() == {"detail": "Playlist {} not found".format(playlist_id)}
 
 
 def test_get_playlist(mongo_test_full):
@@ -119,14 +142,24 @@ def test_add_song(mongo_test_full):
     assert json_response["songs"] == expected_songs
 
 
-def test_add_song_to_playlist_not_found_fails(mongo_test_empty):
+def test_add_song_not_found_to_playlist_fails(mongo_test_empty):
+    new_song = str(TEST_SONG_3["_id"])
+    response = client.put("/playlists/{}/songs".format(str(TEST_PLAYLIST["_id"])), params={'song': new_song})
+    assert response.status_code == 404
+
+
+def test_add_song_to_playlist_not_found_fails(mongo_test_songs):
     new_song = str(TEST_SONG_3["_id"])
     response = client.put("/playlists/{}/songs".format(str(TEST_PLAYLIST["_id"])), params={'song': new_song})
     assert response.status_code == 404
 
 
 def test_update_playlist(mongo_test_full):
-    updated_playlist = {"name": "updated_name", "owner": "updated_owner", "songs": ["625c9dcd232be00e5f827f6d"]}
+    updated_playlist = {
+        "name": "updated_name",
+        "owner": "updated_owner",
+        "songs": ["625c9dcd232be00e5f827f6d"]
+    }
     response = client.put("/playlists/{}".format(str(TEST_PLAYLIST["_id"])), json=updated_playlist)
     assert response.status_code == 200
     assert len(response.json()) > 0
@@ -136,7 +169,7 @@ def test_update_playlist(mongo_test_full):
 
 
 def test_update_playlist_not_found_fails(mongo_test_empty):
-    updated_playlist = {"name": "updated_name", "owner": "updated_owner", "songs": ["625c9dcd232be00e5f827f6d"]}
+    updated_playlist = {"name": "updated_name"}
     response = client.put("/playlists/{}".format(str(TEST_PLAYLIST["_id"])), json=updated_playlist)
     assert response.status_code == 404
 

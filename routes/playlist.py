@@ -9,8 +9,8 @@ playlist_routes = APIRouter()
 
 
 @playlist_routes.get("/playlists", response_model=list[PlaylistModel], tags=["Playlists"], status_code=status.HTTP_200_OK)
-async def get_playlists():
-    return service.playlist.get_all()
+async def get_playlists(q: Optional[str] = None):
+    return service.playlist.find(q)
 
 
 @playlist_routes.get("/playlists/{playlist_id}", response_model=PlaylistModel, tags=["Playlists"], status_code=status.HTTP_200_OK)
@@ -47,8 +47,9 @@ async def add_song(playlist_id: str, song: str, x_request_id: Optional[str] = He
 @playlist_routes.put("/playlists/{playlist_id}", response_model=PlaylistModel, tags=["Playlists"])
 async def update_playlist(playlist_id: str, playlist: UpdatePlaylistRequest, x_request_id: Optional[str] = Header(None)):
     _check_valid_playlist_id(playlist_id)
-    for song in playlist.songs:
-        get_song_and_validate(song)
+    if playlist.songs:
+        for song in playlist.songs:
+            get_song_and_validate(song)
     log_request_body(x_request_id, playlist)
 
     updated_playlist = service.playlist.update(playlist_id, playlist)
