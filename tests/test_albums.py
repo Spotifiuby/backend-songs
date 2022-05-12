@@ -73,8 +73,38 @@ def test_get_all_albums_empty(mongo_test_empty):
     assert response.json() == []
 
 
+def test_find_playlist(mongo_test_songs):
+    test_album1 = {
+        "name": "The Wall",
+        "artists": ["Pink Floyd"],
+        "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])],
+        "year": 1979
+    }
+    test_album2 = {
+        "name": "Revolver",
+        "artists": ["The Beatles"],
+        "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])],
+        "year": 1966
+    }
+    client.post("/albums", json=test_album1)
+    client.post("/albums", json=test_album2)
+    response1 = client.get("/albums", params="q=e")
+    assert len(response1.json()) == 2
+    response2 = client.get("/albums", params="q=wall")
+    assert len(response2.json()) == 1
+    response2 = client.get("/albums", params="q=rev")
+    assert len(response2.json()) == 1
+    response2 = client.get("/albums", params="q=dark")
+    assert len(response2.json()) == 0
+
+
 def test_create_album(mongo_test):
-    test_album = {"name": "test", "artists": ["test"], "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])], "year": 1990}
+    test_album = {
+        "name": "test",
+        "artists": ["test"],
+        "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])],
+        "year": 1990
+    }
     response = client.post("/albums", json=test_album)
     assert response.status_code == 201
     assert len(response.json()) > 0
@@ -122,7 +152,13 @@ def test_add_song(mongo_test):
     assert json_response["songs"] == expected_songs
 
 
-def test_add_song_to_album_not_found_fails(mongo_test_empty):
+def test_add_song_not_found_to_album_fails(mongo_test_empty):
+    new_song = str(TEST_SONG_3["_id"])
+    response = client.put("/albums/{}/songs".format(str(TEST_ALBUM["_id"])), params={'song': new_song})
+    assert response.status_code == 404
+
+
+def test_add_song_to_album_not_found_fails(mongo_test_songs):
     new_song = str(TEST_SONG_3["_id"])
     response = client.put("/albums/{}/songs".format(str(TEST_ALBUM["_id"])), params={'song': new_song})
     assert response.status_code == 404
@@ -156,7 +192,7 @@ def test_update_album(mongo_test):
 
 
 def test_update_album_not_found_fails(mongo_test_empty):
-    updated_album = {"name": "updated_name", "artists": ["updated_artist"], "songs": [str(TEST_SONG_3["_id"])], "year": 2010}
+    updated_album = {"name": "updated_name"}
     response = client.put("/albums/{}".format(str(TEST_ALBUM["_id"])), json=updated_album)
     assert response.status_code == 404
 

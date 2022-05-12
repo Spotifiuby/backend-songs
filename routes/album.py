@@ -9,8 +9,8 @@ album_routes = APIRouter()
 
 
 @album_routes.get("/albums", response_model=list[AlbumModel], tags=["Albums"], status_code=status.HTTP_200_OK)
-async def get_albums():
-    return service.album.get_all()
+async def get_albums(q: Optional[str] = None):
+    return service.album.find(q)
 
 
 @album_routes.get("/albums/{album_id}", response_model=AlbumModel, tags=["Albums"], status_code=status.HTTP_200_OK)
@@ -60,8 +60,9 @@ async def add_artist(album_id: str, artist: str, x_request_id: Optional[str] = H
 @album_routes.put("/albums/{album_id}", response_model=AlbumModel, tags=["Albums"])
 async def update_album(album_id: str, album: UpdateAlbumRequest, x_request_id: Optional[str] = Header(None)):
     _check_valid_album_id(album_id)
-    for song in album.songs:
-        get_song_and_validate(song)
+    if album.songs:
+        for song in album.songs:
+            get_song_and_validate(song)
     log_request_body(x_request_id, album)
 
     updated_album = service.album.update(album_id, album)

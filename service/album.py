@@ -11,8 +11,17 @@ def _album_entity(album) -> dict:
     return album
 
 
-def get_all():
-    return [_album_entity(album) for album in conn.albums.find()]
+def _regex_query(field, q):
+    return {field: {'$regex': q, '$options': 'i'}}
+
+
+def find(q):
+    if not q:
+        mongo_query = {}
+    else:
+        fields = ['name']
+        mongo_query = {'$or': [_regex_query(field, q) for field in fields]}
+    return [_album_entity(song) for song in conn.albums.find(mongo_query)]
 
 
 def get(album_id: str):
