@@ -12,8 +12,17 @@ def _song_entity(song) -> dict:
     return song
 
 
-def get_all():
-    return [_song_entity(song) for song in conn.songs.find()]
+def _regex_query(field, q):
+    return {field: {'$regex': q, '$options': 'i'}}
+
+
+def find(q):
+    if not q:
+        mongo_query = {}
+    else:
+        fields = ['name', 'artists', 'genre']
+        mongo_query = {'$or': [_regex_query(field, q) for field in fields]}
+    return [_song_entity(song) for song in conn.songs.find(mongo_query)]
 
 
 def get(song_id: str):

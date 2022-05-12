@@ -9,8 +9,8 @@ song_routes = APIRouter()
 
 
 @song_routes.get("/songs", response_model=list[SongModel], tags=["Songs"], status_code=status.HTTP_200_OK)
-async def get_songs():
-    return service.song.get_all()
+async def get_songs(q: Optional[str] = None):
+    return service.song.find(q)
 
 
 @song_routes.get("/songs/{song_id}", response_model=SongModel, tags=["Songs"], status_code=status.HTTP_200_OK)

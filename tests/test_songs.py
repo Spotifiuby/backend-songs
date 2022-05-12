@@ -53,6 +53,21 @@ def test_get_all_songs(mongo_test_empty):
     assert len(response.json()) == 10
 
 
+def test_find_song(mongo_test_empty):
+    test_song1 = {"name": "Let it be", "artists": ["The Beatles"], "genre": "rock"}
+    test_song2 = {"name": "Time", "artists": ["Pink Floyd"], "genre": "rock"}
+    client.post("/songs", json=test_song1)
+    client.post("/songs", json=test_song2)
+    response1 = client.get("/songs", params="q=rock")
+    assert len(response1.json()) == 2
+    response2 = client.get("/songs", params="q=beatles")
+    assert len(response2.json()) == 1
+    response2 = client.get("/songs", params="q=let")
+    assert len(response2.json()) == 1
+    response2 = client.get("/songs", params="q=rolling")
+    assert len(response2.json()) == 0
+
+
 def test_get_song_not_found(mongo_test):
     song_id = "625c9dcd232be00e5f827f7b"
     response = client.get("/songs/{}".format(song_id))
