@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Header
+from fastapi import APIRouter, HTTPException, status, Header, Depends
 
 from utils.utils import log_request_body, check_valid_song_id
 from models.song import SongModel, CreateSongRequest, UpdateSongRequest
@@ -14,8 +14,7 @@ async def get_songs(q: Optional[str] = None):
 
 
 @song_routes.get("/songs/{song_id}", response_model=SongModel, tags=["Songs"], status_code=status.HTTP_200_OK)
-async def get_song(song_id: str):
-    check_valid_song_id(song_id)
+async def get_song(song_id: str = Depends(check_valid_song_id)):
     song = service.song.get(song_id)
     if song is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Song {song_id} not found")
@@ -30,10 +29,9 @@ async def create_song(song: CreateSongRequest, x_request_id: Optional[str] = Hea
 
 
 @song_routes.put("/songs/{song_id}", response_model=SongModel, tags=["Songs"])
-async def update_song(song_id: str, song: UpdateSongRequest, x_request_id: Optional[str] = Header(None)):
-    check_valid_song_id(song_id)
+async def update_song(song_id: str = Depends(check_valid_song_id), song: UpdateSongRequest = None,
+                      x_request_id: Optional[str] = Header(None)):
     log_request_body(x_request_id, song)
-
     updated_song = service.song.update(song_id, song)
     if not updated_song:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Song {song_id} not found")
@@ -42,8 +40,7 @@ async def update_song(song_id: str, song: UpdateSongRequest, x_request_id: Optio
 
 
 @song_routes.delete("/songs/{song_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Songs"])
-async def delete_song(song_id: str):
-    check_valid_song_id(song_id)
+async def delete_song(song_id: str = Depends(check_valid_song_id)):
     r = service.song.delete(song_id)
     if not r:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Song {song_id} not found")

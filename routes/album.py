@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException, status, Header
+from fastapi import APIRouter, HTTPException, status, Header, Depends
 from models.album import AlbumModel, CreateAlbumRequest, UpdateAlbumRequest
 import service.album
 from bson import ObjectId
 from typing import Optional
-from utils.utils import log_request_body, get_song_and_validate
+from utils.utils import log_request_body, validate_song, check_valid_album_id
 
 album_routes = APIRouter()
 
@@ -14,8 +14,7 @@ async def get_albums(q: Optional[str] = None):
 
 
 @album_routes.get("/albums/{album_id}", response_model=AlbumModel, tags=["Albums"], status_code=status.HTTP_200_OK)
-async def get_album(album_id: str):
-    _check_valid_album_id(album_id)
+async def get_album(album_id: str = Depends(check_valid_album_id)):
     album = service.album.get(album_id)
     if album is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Album {album_id} not found")
@@ -26,19 +25,18 @@ async def get_album(album_id: str):
 @album_routes.post("/albums", response_model=AlbumModel, tags=["Albums"], status_code=status.HTTP_201_CREATED)
 async def create_album(album: CreateAlbumRequest, x_request_id: Optional[str] = Header(None)):
     for song in album.songs:
-        get_song_and_validate(song)
+        validate_song(song)
     log_request_body(x_request_id, album)
 
     return service.album.create(album)
 
 
 @album_routes.put("/albums/{album_id}/songs", response_model=AlbumModel, tags=["Albums"])
-async def add_song(album_id: str, song: str, x_request_id: Optional[str] = Header(None)):
-    _check_valid_album_id(album_id)
-    get_song_and_validate(song)
-    log_request_body(x_request_id, {"song": song})
+async def add_song(album_id: str = Depends(check_valid_album_id), song_id: str = Depends(validate_song),
+                   x_request_id: Optional[str] = Header(None)):
+    log_request_body(x_request_id, {"song": song_id})
 
-    updated_album = service.album.add_song(album_id, song)
+    updated_album = service.album.add_song(album_id, song_id)
     if not updated_album:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Album {album_id} not found")
 
@@ -47,7 +45,7 @@ async def add_song(album_id: str, song: str, x_request_id: Optional[str] = Heade
 
 @album_routes.put("/albums/{album_id}/artists", response_model=AlbumModel, tags=["Albums"])
 async def add_artist(album_id: str, artist: str, x_request_id: Optional[str] = Header(None)):
-    _check_valid_album_id(album_id)
+    check_valid_album_id(album_id)
     log_request_body(x_request_id, {"artist": artist})
 
     updated_album = service.album.add_artist(album_id, artist)
@@ -59,10 +57,10 @@ async def add_artist(album_id: str, artist: str, x_request_id: Optional[str] = H
 
 @album_routes.put("/albums/{album_id}", response_model=AlbumModel, tags=["Albums"])
 async def update_album(album_id: str, album: UpdateAlbumRequest, x_request_id: Optional[str] = Header(None)):
-    _check_valid_album_id(album_id)
+    check_valid_album_id(album_id)
     if album.songs:
         for song in album.songs:
-            get_song_and_validate(song)
+            validate_song(song)
     log_request_body(x_request_id, album)
 
     updated_album = service.album.update(album_id, album)
@@ -73,13 +71,7 @@ async def update_album(album_id: str, album: UpdateAlbumRequest, x_request_id: O
 
 
 @album_routes.delete("/albums/{album_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Albums"])
-async def delete_album(album_id: str):
-    _check_valid_album_id(album_id)
+async def delete_album(album_id: str = Depends(check_valid_album_id)):
     r = service.album.delete(album_id)
     if not r:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Album {album_id} not found")
-
-
-def _check_valid_album_id(album_id):
-    if not ObjectId.is_valid(album_id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Album ID '{album_id}' is not valid")

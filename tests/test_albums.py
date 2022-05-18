@@ -144,7 +144,7 @@ def test_get_album(mongo_test):
 
 def test_add_song(mongo_test):
     new_song = str(TEST_SONG_3["_id"])
-    response = client.put("/albums/{}/songs".format(str(TEST_ALBUM["_id"])), params={'song': new_song})
+    response = client.put("/albums/{}/songs".format(str(TEST_ALBUM["_id"])), params={'song_id': new_song})
     assert response.status_code == 200
     json_response = response.json()
     expected_songs = TEST_ALBUM["songs"].copy()
@@ -154,13 +154,13 @@ def test_add_song(mongo_test):
 
 def test_add_song_not_found_to_album_fails(mongo_test_empty):
     new_song = str(TEST_SONG_3["_id"])
-    response = client.put("/albums/{}/songs".format(str(TEST_ALBUM["_id"])), params={'song': new_song})
+    response = client.put("/albums/{}/songs".format(str(TEST_ALBUM["_id"])), params={'song_id': new_song})
     assert response.status_code == 404
 
 
 def test_add_song_to_album_not_found_fails(mongo_test_songs):
     new_song = str(TEST_SONG_3["_id"])
-    response = client.put("/albums/{}/songs".format(str(TEST_ALBUM["_id"])), params={'song': new_song})
+    response = client.put("/albums/{}/songs".format(str(TEST_ALBUM["_id"])), params={'song_id': new_song})
     assert response.status_code == 404
 
 

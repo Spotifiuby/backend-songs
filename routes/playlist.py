@@ -3,7 +3,7 @@ from models.playlist import PlaylistModel, CreatePlaylistRequest, UpdatePlaylist
 import service.playlist
 from bson import ObjectId
 from typing import Optional
-from utils.utils import log_request_body, get_song_and_validate
+from utils.utils import log_request_body, validate_song
 
 playlist_routes = APIRouter()
 
@@ -26,7 +26,7 @@ async def get_playlist(playlist_id: str):
 @playlist_routes.post("/playlists", response_model=PlaylistModel, tags=["Playlists"], status_code=status.HTTP_201_CREATED)
 async def create_playlist(playlist: CreatePlaylistRequest, x_request_id: Optional[str] = Header(None)):
     for song in playlist.songs:
-        get_song_and_validate(song)
+        validate_song(song)
     log_request_body(x_request_id, playlist)
     return service.playlist.create(playlist)
 
@@ -34,7 +34,7 @@ async def create_playlist(playlist: CreatePlaylistRequest, x_request_id: Optiona
 @playlist_routes.put("/playlists/{playlist_id}/songs", response_model=PlaylistModel, tags=["Playlists"])
 async def add_song(playlist_id: str, song: str, x_request_id: Optional[str] = Header(None)):
     _check_valid_playlist_id(playlist_id)
-    get_song_and_validate(song)
+    validate_song(song)
     log_request_body(x_request_id, {"song": song})
 
     updated_playlist = service.playlist.add_song(playlist_id, song)
@@ -49,7 +49,7 @@ async def update_playlist(playlist_id: str, playlist: UpdatePlaylistRequest, x_r
     _check_valid_playlist_id(playlist_id)
     if playlist.songs:
         for song in playlist.songs:
-            get_song_and_validate(song)
+            validate_song(song)
     log_request_body(x_request_id, playlist)
 
     updated_playlist = service.playlist.update(playlist_id, playlist)
