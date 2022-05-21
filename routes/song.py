@@ -49,9 +49,9 @@ async def update_song(song_id: str = Depends(check_valid_song_id), song: UpdateS
                       x_request_id: Optional[str] = Header(None)):
     log_request_body(x_request_id, song)
     verify_token(x_api_key)
-    if not service.song.is_owner(song_id, x_user_id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"The owner of song {song_id} is not {x_user_id}")
+    # if not service.song.is_owner(song_id, x_user_id):
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+    #                         detail=f"The owner of song {song_id} is not {x_user_id}")
     updated_song = service.song.update(song_id, song)
     if not updated_song:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Song {song_id} not found")
