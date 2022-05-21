@@ -41,6 +41,11 @@ def create(song):
     return _song_entity(mongo_song)
 
 
+def is_owner(song_id, user_id):
+    song = conn.songs.find_one({'_id': ObjectId(song_id), 'artist': user_id})
+    return song is not None
+
+
 def update(song_id, song):
     to_update = {k: v for k, v in song.dict().items() if v is not None}
     updated_song = conn.songs.find_one_and_update(

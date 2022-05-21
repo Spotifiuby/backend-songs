@@ -1,20 +1,29 @@
 from fastapi import APIRouter, HTTPException, status, Header
-from models.playlist import PlaylistModel, CreatePlaylistRequest, UpdatePlaylistRequest
-import service.playlist
 from bson import ObjectId
 from typing import Optional
-from utils.utils import log_request_body, validate_song
+
+from models.playlist import PlaylistModel, CreatePlaylistRequest, UpdatePlaylistRequest
+import service.playlist
+from utils.utils import log_request_body, validate_song, verify_token
 
 playlist_routes = APIRouter()
 
 
 @playlist_routes.get("/playlists", response_model=list[PlaylistModel], tags=["Playlists"], status_code=status.HTTP_200_OK)
-async def get_playlists(q: Optional[str] = None):
+async def get_playlists(q: Optional[str] = None,
+                        x_user_id: Optional[str] = Header(None),
+                        x_api_key: Optional[str] = Header(None),
+                        authorization: Optional[str] = Header(None)):
+    verify_token(x_api_key)
     return service.playlist.find(q)
 
 
 @playlist_routes.get("/playlists/{playlist_id}", response_model=PlaylistModel, tags=["Playlists"], status_code=status.HTTP_200_OK)
-async def get_playlist(playlist_id: str):
+async def get_playlist(playlist_id: str,
+                       x_user_id: Optional[str] = Header(None),
+                       x_api_key: Optional[str] = Header(None),
+                       authorization: Optional[str] = Header(None)):
+    verify_token(x_api_key)
     _check_valid_playlist_id(playlist_id)
     playlist = service.playlist.get(playlist_id)
     if playlist is None:
@@ -24,7 +33,12 @@ async def get_playlist(playlist_id: str):
 
 
 @playlist_routes.post("/playlists", response_model=PlaylistModel, tags=["Playlists"], status_code=status.HTTP_201_CREATED)
-async def create_playlist(playlist: CreatePlaylistRequest, x_request_id: Optional[str] = Header(None)):
+async def create_playlist(playlist: CreatePlaylistRequest,
+                          x_request_id: Optional[str] = Header(None),
+                          x_user_id: Optional[str] = Header(None),
+                          x_api_key: Optional[str] = Header(None),
+                          authorization: Optional[str] = Header(None)):
+    verify_token(x_api_key)
     for song in playlist.songs:
         validate_song(song)
     log_request_body(x_request_id, playlist)
@@ -32,7 +46,12 @@ async def create_playlist(playlist: CreatePlaylistRequest, x_request_id: Optiona
 
 
 @playlist_routes.put("/playlists/{playlist_id}/songs", response_model=PlaylistModel, tags=["Playlists"])
-async def add_song(playlist_id: str, song: str, x_request_id: Optional[str] = Header(None)):
+async def add_song(playlist_id: str, song: str,
+                   x_request_id: Optional[str] = Header(None),
+                   x_user_id: Optional[str] = Header(None),
+                   x_api_key: Optional[str] = Header(None),
+                   authorization: Optional[str] = Header(None)):
+    verify_token(x_api_key)
     _check_valid_playlist_id(playlist_id)
     validate_song(song)
     log_request_body(x_request_id, {"song": song})
@@ -45,7 +64,12 @@ async def add_song(playlist_id: str, song: str, x_request_id: Optional[str] = He
 
 
 @playlist_routes.put("/playlists/{playlist_id}", response_model=PlaylistModel, tags=["Playlists"])
-async def update_playlist(playlist_id: str, playlist: UpdatePlaylistRequest, x_request_id: Optional[str] = Header(None)):
+async def update_playlist(playlist_id: str, playlist: UpdatePlaylistRequest,
+                          x_request_id: Optional[str] = Header(None),
+                          x_user_id: Optional[str] = Header(None),
+                          x_api_key: Optional[str] = Header(None),
+                          authorization: Optional[str] = Header(None)):
+    verify_token(x_api_key)
     _check_valid_playlist_id(playlist_id)
     if playlist.songs:
         for song in playlist.songs:
@@ -60,7 +84,11 @@ async def update_playlist(playlist_id: str, playlist: UpdatePlaylistRequest, x_r
 
 
 @playlist_routes.delete("/playlists/{playlist_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Playlists"])
-async def delete_playlist(playlist_id: str):
+async def delete_playlist(playlist_id: str,
+                          x_user_id: Optional[str] = Header(None),
+                          x_api_key: Optional[str] = Header(None),
+                          authorization: Optional[str] = Header(None)):
+    verify_token(x_api_key)
     _check_valid_playlist_id(playlist_id)
     r = service.playlist.delete(playlist_id)
     if not r:

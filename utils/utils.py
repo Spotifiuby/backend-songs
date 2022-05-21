@@ -4,12 +4,18 @@ import logging
 from bson import ObjectId
 from fastapi import HTTPException, Depends
 from starlette import status
+import os
 
 import service.song
 from exceptions.song_exceptions import SongNotFound, SongNotAvailable
 from models.song import SongModel
 
 logger = logging.getLogger('main-logger')
+
+
+def verify_token(token):
+    if os.getenv("CURRENT_ENVIRONMENT") == "production" and token != os.getenv('access_token'):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Access token not valid")
 
 
 def log_request_body(request_id, body):
