@@ -32,6 +32,24 @@ def check_valid_song_id(song_id):
     return song_id
 
 
+def check_valid_artist_id(artist_id):
+    if not ObjectId.is_valid(artist_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Artist ID '{artist_id}' is not valid")
+    return artist_id
+
+
+def check_valid_playlist_id(playlist_id):
+    if not ObjectId.is_valid(playlist_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Artist ID '{playlist_id}' is not valid")
+    return playlist_id
+
+
+def check_valid_album_id(album_id):
+    if not ObjectId.is_valid(album_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Artist ID '{album_id}' is not valid")
+    return album_id
+
+
 def _check_active_song(song: dict):
     return SongModel.is_active(song)
 
@@ -43,9 +61,3 @@ def validate_song(song_id: str = Depends(check_valid_song_id)):
     if not _check_active_song(song):
         raise SongNotAvailable(song_id)
     return song_id
-
-
-def check_valid_album_id(album_id):
-    if not ObjectId.is_valid(album_id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Album ID '{album_id}' is not valid")
-    return album_id
