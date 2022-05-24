@@ -3,7 +3,7 @@ from typing import Optional
 
 from models.album import AlbumModel, CreateAlbumRequest, UpdateAlbumRequest
 import service.album
-from utils.utils import log_request_body, validate_song, check_valid_album_id, verify_token
+from utils.utils import log_request_body, validate_song, check_valid_album_id, verify_api_key
 
 album_routes = APIRouter()
 
@@ -13,7 +13,7 @@ async def get_albums(q: Optional[str] = None,
                      x_user_id: Optional[str] = Header(None),
                      x_api_key: Optional[str] = Header(None),
                      authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     return service.album.find(q)
 
 
@@ -22,7 +22,7 @@ async def get_album(album_id: str = Depends(check_valid_album_id),
                     x_user_id: Optional[str] = Header(None),
                     x_api_key: Optional[str] = Header(None),
                     authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     album = service.album.get(album_id)
     if album is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Album {album_id} not found")
@@ -35,7 +35,7 @@ async def create_album(album: CreateAlbumRequest, x_request_id: Optional[str] = 
                        x_user_id: Optional[str] = Header(None),
                        x_api_key: Optional[str] = Header(None),
                        authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     for song in album.songs:
         validate_song(song)
     log_request_body(x_request_id, album)
@@ -49,7 +49,7 @@ async def add_song(album_id: str = Depends(check_valid_album_id), song_id: str =
                    x_user_id: Optional[str] = Header(None),
                    x_api_key: Optional[str] = Header(None),
                    authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     log_request_body(x_request_id, {"song": song_id})
 
     updated_album = service.album.add_song(album_id, song_id)
@@ -65,7 +65,7 @@ async def add_artist(album_id: str, artist: str,
                      x_user_id: Optional[str] = Header(None),
                      x_api_key: Optional[str] = Header(None),
                      authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     check_valid_album_id(album_id)
     log_request_body(x_request_id, {"artist": artist})
 
@@ -82,7 +82,7 @@ async def update_album(album_id: str, album: UpdateAlbumRequest,
                        x_user_id: Optional[str] = Header(None),
                        x_api_key: Optional[str] = Header(None),
                        authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     check_valid_album_id(album_id)
     if album.songs:
         for song in album.songs:
@@ -101,7 +101,7 @@ async def delete_album(album_id: str = Depends(check_valid_album_id),
                        x_user_id: Optional[str] = Header(None),
                        x_api_key: Optional[str] = Header(None),
                        authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     r = service.album.delete(album_id)
     if not r:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Album {album_id} not found")

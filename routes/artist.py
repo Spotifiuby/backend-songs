@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Header, Depends
 from typing import Optional
 
-from utils.utils import log_request_body, check_valid_artist_id, verify_token
+from utils.utils import log_request_body, check_valid_artist_id, verify_api_key
 from models.artist import ArtistModel, CreateArtistRequest, UpdateArtistRequest
 import service.artist
 
@@ -13,7 +13,7 @@ async def get_artists(q: Optional[str] = None,
                     x_user_id: Optional[str] = Header(None),
                     x_api_key: Optional[str] = Header(None),
                     authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     return service.artist.find(q)
 
 
@@ -22,7 +22,7 @@ async def get_artist(artist_id: str = Depends(check_valid_artist_id),
                    x_user_id: Optional[str] = Header(None),
                    x_api_key: Optional[str] = Header(None),
                    authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     artist = service.artist.get(artist_id)
     if artist is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Artist {artist_id} not found")
@@ -37,7 +37,7 @@ async def create_artist(artist: CreateArtistRequest,
                       authorization: Optional[str] = Header(None),
                       x_request_id: Optional[str] = Header(None)):
     log_request_body(x_request_id, artist)
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     if not x_user_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="x_user_id is missing")
@@ -51,7 +51,7 @@ async def update_artist(artist_id: str = Depends(check_valid_artist_id), artist:
                       authorization: Optional[str] = Header(None),
                       x_request_id: Optional[str] = Header(None)):
     log_request_body(x_request_id, artist)
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     # if not service.artist.is_owner(artist_id, x_user_id):
     #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
     #                         detail=f"The owner of artist {artist_id} is not {x_user_id}")
@@ -66,7 +66,7 @@ async def delete_artist(artist_id: str = Depends(check_valid_artist_id),
                       x_user_id: Optional[str] = Header(None),
                       x_api_key: Optional[str] = Header(None),
                       authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     r = service.artist.delete(artist_id)
     if not r:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Artist {artist_id} not found")

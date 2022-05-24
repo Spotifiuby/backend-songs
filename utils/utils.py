@@ -13,9 +13,11 @@ from models.song import SongModel
 logger = logging.getLogger('main-logger')
 
 
-def verify_token(token):
-    if os.getenv("CURRENT_ENVIRONMENT") == "production" and token != os.getenv('GATEWAY_API_KEY'):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Access token not valid")
+def verify_api_key(api_key):
+    backoffice_app_api_key = os.getenv('BACKOFFICE_API_KEY')
+    native_app_api_key = os.getenv('NATIVE_APP_API_KEY')
+    if os.getenv("CURRENT_ENVIRONMENT") == "production" and api_key not in [backoffice_app_api_key, native_app_api_key]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Api key not valid")
 
 
 def log_request_body(request_id, body):

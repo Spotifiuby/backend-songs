@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Header, Depends
 from typing import Optional
 
-from utils.utils import log_request_body, check_valid_song_id, verify_token
+from utils.utils import log_request_body, check_valid_song_id, verify_api_key
 from utils.user import is_admin
 from models.song import SongModel, CreateSongRequest, UpdateSongRequest
 import service.song
@@ -27,7 +27,7 @@ async def get_songs(q: Optional[str] = None,
                     x_user_id: Optional[str] = Header(None),
                     x_api_key: Optional[str] = Header(None),
                     authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     return service.song.find(q)
 
 
@@ -36,7 +36,7 @@ async def get_song(song_id: str = Depends(check_valid_song_id),
                    x_user_id: Optional[str] = Header(None),
                    x_api_key: Optional[str] = Header(None),
                    authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     song = service.song.get(song_id)
     if song is None:
         raise SongNotFound(song_id)
@@ -50,7 +50,7 @@ async def create_song(song: CreateSongRequest,
                       authorization: Optional[str] = Header(None),
                       x_request_id: Optional[str] = Header(None)):
     log_request_body(x_request_id, song)
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     _verify_user_id(x_user_id)
     return service.song.create(song, x_user_id)
 
@@ -62,7 +62,7 @@ async def update_song(song_id: str = Depends(check_valid_song_id), song: UpdateS
                       authorization: Optional[str] = Header(None),
                       x_request_id: Optional[str] = Header(None)):
     log_request_body(x_request_id, song)
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     _verify_ownership(song_id, x_user_id)
     updated_song = service.song.update(song_id, song)
     if not updated_song:
@@ -76,7 +76,7 @@ async def delete_song(song_id: str = Depends(check_valid_song_id),
                       x_user_id: Optional[str] = Header(None),
                       x_api_key: Optional[str] = Header(None),
                       authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     _verify_ownership(song_id, x_user_id)
     r = service.song.delete(song_id)
     if not r:

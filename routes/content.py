@@ -4,7 +4,7 @@ from typing import Optional
 from exceptions.content_exceptions import ContentNotFound
 from service.content import get_song_content, upload_song_content
 import service.song
-from utils.utils import validate_song, verify_token
+from utils.utils import validate_song, verify_api_key
 
 content_routes = APIRouter()
 
@@ -14,7 +14,7 @@ async def get_content(song_id: str = Depends(validate_song),
                       x_user_id: Optional[str] = Header(None),
                       x_api_key: Optional[str] = Header(None),
                       authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     contents = get_song_content(song_id)
     if contents:
         return Response(media_type="audio/mpeg", content=contents)
@@ -27,7 +27,7 @@ async def post_content(song_id: str = Depends(validate_song), file: UploadFile =
                        x_user_id: Optional[str] = Header(None),
                        x_api_key: Optional[str] = Header(None),
                        authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     upload_song_content(song_id, await file.read())
     service.song.activate_song(song_id)
     return Response(status_code=status.HTTP_201_CREATED)

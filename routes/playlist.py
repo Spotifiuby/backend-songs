@@ -4,7 +4,7 @@ from typing import Optional
 
 from models.playlist import PlaylistModel, CreatePlaylistRequest, UpdatePlaylistRequest
 import service.playlist
-from utils.utils import log_request_body, validate_song, verify_token, check_valid_playlist_id
+from utils.utils import log_request_body, validate_song, verify_api_key, check_valid_playlist_id
 
 playlist_routes = APIRouter()
 
@@ -14,7 +14,7 @@ async def get_playlists(q: Optional[str] = None,
                         x_user_id: Optional[str] = Header(None),
                         x_api_key: Optional[str] = Header(None),
                         authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     return service.playlist.find(q)
 
 
@@ -23,7 +23,7 @@ async def get_playlist(playlist_id: str,
                        x_user_id: Optional[str] = Header(None),
                        x_api_key: Optional[str] = Header(None),
                        authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     check_valid_playlist_id(playlist_id)
     playlist = service.playlist.get(playlist_id)
     if playlist is None:
@@ -38,7 +38,7 @@ async def create_playlist(playlist: CreatePlaylistRequest,
                           x_user_id: Optional[str] = Header(None),
                           x_api_key: Optional[str] = Header(None),
                           authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     for song in playlist.songs:
         validate_song(song)
     log_request_body(x_request_id, playlist)
@@ -51,7 +51,7 @@ async def add_song(playlist_id: str, song: str,
                    x_user_id: Optional[str] = Header(None),
                    x_api_key: Optional[str] = Header(None),
                    authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     check_valid_playlist_id(playlist_id)
     validate_song(song)
     log_request_body(x_request_id, {"song": song})
@@ -69,7 +69,7 @@ async def update_playlist(playlist_id: str, playlist: UpdatePlaylistRequest,
                           x_user_id: Optional[str] = Header(None),
                           x_api_key: Optional[str] = Header(None),
                           authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     check_valid_playlist_id(playlist_id)
     if playlist.songs:
         for song in playlist.songs:
@@ -88,7 +88,7 @@ async def delete_playlist(playlist_id: str,
                           x_user_id: Optional[str] = Header(None),
                           x_api_key: Optional[str] = Header(None),
                           authorization: Optional[str] = Header(None)):
-    verify_token(x_api_key)
+    verify_api_key(x_api_key)
     check_valid_playlist_id(playlist_id)
     r = service.playlist.delete(playlist_id)
     if not r:
