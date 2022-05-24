@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Header, Depends
+from typing import Optional
 
 from models.album import AlbumModel, CreateAlbumRequest, UpdateAlbumRequest
 import service.album
-from typing import Optional
 from utils.utils import log_request_body, validate_song, check_valid_album_id, verify_token
 
 album_routes = APIRouter()

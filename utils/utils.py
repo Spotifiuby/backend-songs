@@ -14,7 +14,7 @@ logger = logging.getLogger('main-logger')
 
 
 def verify_token(token):
-    if os.getenv("CURRENT_ENVIRONMENT") == "production" and token != os.getenv('access_token'):
+    if os.getenv("CURRENT_ENVIRONMENT") == "production" and token != os.getenv('GATEWAY_API_KEY'):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Access token not valid")
 
 
