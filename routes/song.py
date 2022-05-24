@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Header, Depends
+from fastapi import APIRouter, status, Header, Depends, Response
 from typing import Optional
 
 from utils.utils import log_request_body, check_valid_song_id, verify_api_key
@@ -23,19 +23,25 @@ def _verify_ownership(song_id, user_id):
 
 
 @song_routes.get("/songs", response_model=list[SongModel], tags=["Songs"], status_code=status.HTTP_200_OK)
-async def get_songs(q: Optional[str] = None,
+async def get_songs(response: Response,
+                    q: Optional[str] = None,
                     x_user_id: Optional[str] = Header(None),
                     x_api_key: Optional[str] = Header(None),
                     authorization: Optional[str] = Header(None)):
+    if authorization:
+        response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
     return service.song.find(q)
 
 
 @song_routes.get("/songs/{song_id}", response_model=SongModel, tags=["Songs"], status_code=status.HTTP_200_OK)
-async def get_song(song_id: str = Depends(check_valid_song_id),
+async def get_song(response: Response,
+                   song_id: str = Depends(check_valid_song_id),
                    x_user_id: Optional[str] = Header(None),
                    x_api_key: Optional[str] = Header(None),
                    authorization: Optional[str] = Header(None)):
+    if authorization:
+        response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
     song = service.song.get(song_id)
     if song is None:
@@ -44,11 +50,14 @@ async def get_song(song_id: str = Depends(check_valid_song_id),
 
 
 @song_routes.post("/songs", response_model=SongModel, tags=["Songs"], status_code=status.HTTP_201_CREATED)
-async def create_song(song: CreateSongRequest,
+async def create_song(response: Response,
+                      song: CreateSongRequest,
                       x_user_id: Optional[str] = Header(None),
                       x_api_key: Optional[str] = Header(None),
                       authorization: Optional[str] = Header(None),
                       x_request_id: Optional[str] = Header(None)):
+    if authorization:
+        response.headers['authorization'] = authorization
     log_request_body(x_request_id, song)
     verify_api_key(x_api_key)
     _verify_user_id(x_user_id)
@@ -56,11 +65,15 @@ async def create_song(song: CreateSongRequest,
 
 
 @song_routes.put("/songs/{song_id}", response_model=SongModel, tags=["Songs"])
-async def update_song(song_id: str = Depends(check_valid_song_id), song: UpdateSongRequest = None,
+async def update_song(response: Response,
+                      song_id: str = Depends(check_valid_song_id),
+                      song: UpdateSongRequest = None,
                       x_user_id: Optional[str] = Header(None),
                       x_api_key: Optional[str] = Header(None),
                       authorization: Optional[str] = Header(None),
                       x_request_id: Optional[str] = Header(None)):
+    if authorization:
+        response.headers['authorization'] = authorization
     log_request_body(x_request_id, song)
     verify_api_key(x_api_key)
     _verify_ownership(song_id, x_user_id)
@@ -72,10 +85,13 @@ async def update_song(song_id: str = Depends(check_valid_song_id), song: UpdateS
 
 
 @song_routes.delete("/songs/{song_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Songs"])
-async def delete_song(song_id: str = Depends(check_valid_song_id),
+async def delete_song(response: Response,
+                      song_id: str = Depends(check_valid_song_id),
                       x_user_id: Optional[str] = Header(None),
                       x_api_key: Optional[str] = Header(None),
                       authorization: Optional[str] = Header(None)):
+    if authorization:
+        response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
     _verify_ownership(song_id, x_user_id)
     r = service.song.delete(song_id)

@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 from bson import ObjectId
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
 from starlette import status
 import os
 
@@ -56,7 +56,8 @@ def _check_active_song(song: dict):
     return SongModel.is_active(song)
 
 
-def validate_song(song_id: str = Depends(check_valid_song_id)):
+def validate_song(song_id: str):
+    check_valid_song_id(song_id)
     song = service.song.get(song_id)
     if not song:
         raise SongNotFound(song_id)

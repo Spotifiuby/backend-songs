@@ -10,10 +10,13 @@ content_routes = APIRouter()
 
 
 @content_routes.get("/songs/{song_id}/content", response_class=Response, tags=["Content"])
-async def get_content(song_id: str = Depends(validate_song),
+async def get_content(response: Response,
+                      song_id: str = Depends(validate_song),
                       x_user_id: Optional[str] = Header(None),
                       x_api_key: Optional[str] = Header(None),
                       authorization: Optional[str] = Header(None)):
+    if authorization:
+        response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
     contents = get_song_content(song_id)
     if contents:
@@ -23,10 +26,14 @@ async def get_content(song_id: str = Depends(validate_song),
 
 
 @content_routes.post("/songs/{song_id}/content", response_class=Response, tags=["Content"])
-async def post_content(song_id: str = Depends(validate_song), file: UploadFile = None,
+async def post_content(response: Response,
+                       song_id: str = Depends(validate_song),
+                       file: UploadFile = None,
                        x_user_id: Optional[str] = Header(None),
                        x_api_key: Optional[str] = Header(None),
                        authorization: Optional[str] = Header(None)):
+    if authorization:
+        response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
     upload_song_content(song_id, await file.read())
     service.song.activate_song(song_id)
