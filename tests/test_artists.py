@@ -96,7 +96,7 @@ def test_get_artist(mongo_test):
 def test_update_artist(mongo_test):
     updated_artist = {"name": "updated_name"}
     response = client.put("/artists/{}".format(str(TEST_ARTIST["_id"])), json=updated_artist,
-                          headers={'x_user_id': TEST_ARTIST['user_id']})
+                          headers={'x-user-id': TEST_ARTIST['user_id']})
     assert response.status_code == 200
     assert len(response.json()) > 0
     assert response.json()["name"] == updated_artist["name"]
@@ -105,7 +105,7 @@ def test_update_artist(mongo_test):
 def test_update_artist_not_found_fails(mongo_test_empty):
     updated_artist = {"name": "updated_name"}
     response = client.put("/artists/{}".format(str(TEST_ARTIST["_id"])), json=updated_artist,
-                          headers={'x_user_id': TEST_ARTIST['user_id']})
+                          headers={'x-user-id': TEST_ARTIST['user_id']})
     assert response.status_code == 404
 
 

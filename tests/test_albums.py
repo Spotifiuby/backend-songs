@@ -53,6 +53,7 @@ TEST_ALBUM = {
 def mongo_test_empty():
     conn.albums.delete_many({})
     conn.songs.delete_many({})
+    conn.artists.delete_many({})
 
 
 @pytest.fixture()

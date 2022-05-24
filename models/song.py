@@ -26,7 +26,7 @@ class SongModel(BaseModel):
 
 class CreateSongRequest(BaseModel):
     name: str
-    artists: list[str]
+    artists: Optional[list[str]]
     genre: str
 
 

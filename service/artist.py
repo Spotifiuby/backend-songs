@@ -24,8 +24,12 @@ def find(q):
     return [_artist_entity(artist) for artist in conn.artists.find(mongo_query)]
 
 
-def get(artist_id: str):
-    artist = conn.artists.find_one({"_id": ObjectId(artist_id)})
+def get(artist_id: str = None, user_id: str = None):
+    artist = None
+    if artist_id:
+        artist = conn.artists.find_one({"_id": ObjectId(artist_id)})
+    elif user_id:
+        artist = conn.artists.find_one({"user_id": user_id})
     return _artist_entity(artist)
 
 

@@ -1,11 +1,13 @@
 from fastapi.testclient import TestClient
-from models.song import StatusEnum
 from bson import ObjectId
-from main import app
-from config.db import conn
-from config.db import bucket
 import io
 import pytest
+
+from main import app
+from models.song import StatusEnum
+from config.db import conn
+from config.db import bucket
+from tests.test_artists import TEST_ARTIST
 
 client = TestClient(app)
 
@@ -18,13 +20,15 @@ SONG_AND_CONTENT_OK = "625c9dcd232be00e5f827f7c"
 @pytest.fixture()
 def mongo_test_empty():
     conn.songs.delete_many({})
+    conn.artists.delete_many({})
 
 
 @pytest.fixture()
 def mongo_test(mongo_test_empty):
-    conn.songs.insert_one({"_id": ObjectId(SONG_NOT_AVAILABLE_ID), "status": StatusEnum.inactive})
-    conn.songs.insert_one({"_id": ObjectId(CONTENT_NOT_FOUND_ID), "status": StatusEnum.not_uploaded})
-    conn.songs.insert_one({"_id": ObjectId(f"{SONG_AND_CONTENT_OK}"), "status": StatusEnum.active})
+    conn.songs.insert_one({"_id": ObjectId(SONG_NOT_AVAILABLE_ID), "status": StatusEnum.inactive, "artists": []})
+    conn.songs.insert_one({"_id": ObjectId(CONTENT_NOT_FOUND_ID), "status": StatusEnum.not_uploaded, "artists": []})
+    conn.songs.insert_one({"_id": ObjectId(f"{SONG_AND_CONTENT_OK}"), "status": StatusEnum.active, "artists": []})
+    conn.artists.insert_one(TEST_ARTIST)
     bucket.blob(f"{SONG_AND_CONTENT_OK}/{SONG_AND_CONTENT_OK}.mp3").upload_from_string("content")
 
 
@@ -37,13 +41,13 @@ def test_get_content_not_found(mongo_test):
 def test_get_content_song_not_found(mongo_test_empty):
     response = client.get(f"/songs/{SONG_NOT_FOUND_ID}/content")
     assert response.status_code == 404
-    assert response.json() == {'detail': f'Song not found {SONG_NOT_FOUND_ID}'}
+    assert response.json() == {'detail': f'Song {SONG_NOT_FOUND_ID} not found'}
 
 
 def test_get_content_song_not_available(mongo_test):
     response = client.get(f"/songs/{SONG_NOT_AVAILABLE_ID}/content")
     assert response.status_code == 400
-    assert response.json() == {'detail': f'Song not available {SONG_NOT_AVAILABLE_ID}'}
+    assert response.json() == {'detail': f'Song {SONG_NOT_AVAILABLE_ID} not available'}
 
 
 def test_create_content(mongo_test):
@@ -61,8 +65,8 @@ def test_get_content(mongo_test):
 
 
 def test_create_and_get_song_and_content(mongo_test):
-    test_song = {"name": "test", "artists": ["test"], "genre": "rock"}
-    response = client.post("/songs", json=test_song)
+    test_song = {"name": "test", "artists": [], "genre": "rock"}
+    response = client.post("/songs", json=test_song, headers={'x-user-id': TEST_ARTIST['user_id']})
     assert response.status_code == 201
     assert len(response.json()) > 0
     response.json()["name"] = "test"
@@ -86,4 +90,5 @@ def test_create_and_get_song_and_content(mongo_test):
     del json_response["date_uploaded"]
     test_song['id'] = song_id
     test_song['status'] = 'active'
+    test_song['artists'] = [str(TEST_ARTIST['_id'])]
     assert json_response == test_song

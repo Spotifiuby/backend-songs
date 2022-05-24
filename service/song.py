@@ -1,14 +1,19 @@
 from bson import ObjectId
 import pymongo
 import datetime
+
 from config.db import conn
 from models.song import StatusEnum
+import service.artist
+from exceptions.artist_exception import ArtistNotFoundForUser
+from exceptions.song_exceptions import SongNotFound
 
 
 def _song_entity(song) -> dict:
     if not song:
         return song
     song["id"] = str(song.pop("_id"))
+    song["artists"] = [str(a) for a in song["artists"]]
     return song
 
 
@@ -30,8 +35,16 @@ def get(song_id: str):
     return _song_entity(song)
 
 
-def create(song):
+def create(song, user_id):
+    artist = service.artist.get(user_id=user_id)
+    if not artist:
+        raise ArtistNotFoundForUser(user_id)
+    artist_id = artist['id']
     song_dict = song.dict()
+    if "artists" not in song_dict or not song_dict["artists"]:
+        song_dict["artists"] = []
+    if artist_id not in song_dict["artists"]:
+        song_dict["artists"].insert(0, artist_id)
     song_dict["status"] = StatusEnum.not_uploaded
     song_dict["date_created"] = datetime.datetime.today()
     song_dict["date_uploaded"] = None
@@ -42,8 +55,14 @@ def create(song):
 
 
 def is_owner(song_id, user_id):
-    song = conn.songs.find_one({'_id': ObjectId(song_id), 'artist': user_id})
-    return song is not None
+    song = conn.songs.find_one({'_id': ObjectId(song_id)})
+    if not song:
+        raise SongNotFound(song_id)
+    for artist_id in song['artists']:
+        artist = service.artist.get(artist_id)
+        if artist['user_id'] == user_id:
+            return True
+    return False
 
 
 def update(song_id, song):
