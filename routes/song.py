@@ -11,9 +11,13 @@ from exceptions.user_exceptions import MissingUserId
 song_routes = APIRouter()
 
 
-def _verify_ownership(song_id, user_id):
+def _verify_user_id(user_id):
     if not user_id:
         raise MissingUserId()
+    return user_id
+
+
+def _verify_ownership(song_id, user_id):
     if not service.song.is_owner(song_id, user_id) and not is_admin(user_id):
         raise SongNotOwnedByUser(song_id, user_id)
 
@@ -47,6 +51,7 @@ async def create_song(song: CreateSongRequest,
                       x_request_id: Optional[str] = Header(None)):
     log_request_body(x_request_id, song)
     verify_token(x_api_key)
+    _verify_user_id(x_user_id)
     return service.song.create(song, x_user_id)
 
 

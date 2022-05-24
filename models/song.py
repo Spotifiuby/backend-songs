@@ -34,6 +34,7 @@ class UpdateSongRequest(BaseModel):
     name: Optional[str]
     artists: Optional[list]
     genre: Optional[str]
+    status: Optional[StatusEnum]
 
 
 # Definitions
