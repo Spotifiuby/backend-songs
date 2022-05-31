@@ -1,13 +1,15 @@
 from bson import ObjectId
 import pymongo
 import datetime
+
 from config.db import conn
 
 
 def _album_entity(album) -> dict:
     if not album:
         return album
-    album["id"] = str(album.pop("_id"))
+    album['id'] = str(album.pop('_id'))
+    album['artists'] = [str(artist_id) for artist_id in album['artists']]
     return album
 
 
@@ -41,19 +43,19 @@ def create(album):
     return _album_entity(mongo_album)
 
 
-def add_song(album_id, song):
+def add_song(album_id, song_id):
     updated_album = conn.albums.find_one_and_update(
         {"_id": ObjectId(album_id)},
-        {"$push": {"songs": song}},
+        {"$push": {"songs": song_id}},
         return_document=pymongo.ReturnDocument.AFTER
     )
     return _album_entity(updated_album)
 
 
-def add_artist(album_id, artist):
+def add_artist(album_id, artist_id):
     updated_album = conn.albums.find_one_and_update(
         {"_id": ObjectId(album_id)},
-        {"$push": {"artists": artist}},
+        {"$push": {"artists": artist_id}},
         return_document=pymongo.ReturnDocument.AFTER
     )
     return _album_entity(updated_album)

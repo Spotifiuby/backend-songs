@@ -5,6 +5,7 @@ from utils.utils import log_request_body, check_valid_song_id, verify_api_key
 from utils.user import is_admin
 from models.song import SongModel, CreateSongRequest, UpdateSongRequest
 import service.song
+import service.artist
 from exceptions.song_exceptions import SongNotFound, SongNotOwnedByUser
 from exceptions.user_exceptions import MissingUserId
 
@@ -31,7 +32,10 @@ async def get_songs(response: Response,
     if authorization:
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
-    return service.song.find(q)
+    songs = service.song.find(q)
+    for song in songs:
+        song['artists'] = [service.artist.get_name(artist_id) for artist_id in song['artists']]
+    return songs
 
 
 @song_routes.get("/songs/{song_id}", response_model=SongModel, tags=["Songs"], status_code=status.HTTP_200_OK)
@@ -46,6 +50,7 @@ async def get_song(response: Response,
     song = service.song.get(song_id)
     if song is None:
         raise SongNotFound(song_id)
+    song['artists'] = [service.artist.get_name(artist_id) for artist_id in song['artists']]
     return song
 
 

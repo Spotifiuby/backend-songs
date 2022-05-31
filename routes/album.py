@@ -3,7 +3,8 @@ from typing import Optional
 
 from models.album import AlbumModel, CreateAlbumRequest, UpdateAlbumRequest
 import service.album
-from utils.utils import log_request_body, validate_song, check_valid_album_id, verify_api_key
+import service.artist
+from utils.utils import log_request_body, validate_song, check_valid_album_id, check_valid_artist_id, verify_api_key
 
 album_routes = APIRouter()
 
@@ -17,7 +18,10 @@ async def get_albums(response: Response,
     if authorization:
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
-    return service.album.find(q)
+    albums = service.album.find(q)
+    for album in albums:
+        album['artists'] = [service.artist.get_name(artist_id) for artist_id in album['artists']]
+    return albums
 
 
 @album_routes.get("/albums/{album_id}", response_model=AlbumModel, tags=["Albums"], status_code=status.HTTP_200_OK)
@@ -32,6 +36,7 @@ async def get_album(response: Response,
     album = service.album.get(album_id)
     if album is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Album {album_id} not found")
+    album['artists'] = [service.artist.get_name(artist_id) for artist_id in album['artists']]
     return album
 
 
@@ -73,7 +78,8 @@ async def add_song(response:  Response,
 
 @album_routes.put("/albums/{album_id}/artists", response_model=AlbumModel, tags=["Albums"])
 async def add_artist(response: Response,
-                     album_id: str, artist: str,
+                     album_id: str,
+                     artist_id: str,
                      x_request_id: Optional[str] = Header(None),
                      x_user_id: Optional[str] = Header(None),
                      x_api_key: Optional[str] = Header(None),
@@ -82,9 +88,10 @@ async def add_artist(response: Response,
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
     check_valid_album_id(album_id)
-    log_request_body(x_request_id, {"artist": artist})
+    check_valid_artist_id(artist_id)
+    log_request_body(x_request_id, {"artist_id": artist_id})
 
-    updated_album = service.album.add_artist(album_id, artist)
+    updated_album = service.album.add_artist(album_id, artist_id)
     if not updated_album:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Album {album_id} not found")
 

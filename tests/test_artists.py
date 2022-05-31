@@ -12,6 +12,13 @@ TEST_ARTIST = {
     "date_created": datetime.datetime.today(),
 }
 
+TEST_ARTIST_2 = {
+    "_id": ObjectId("625c9dcd232be00e5f827f6b"),
+    "name": "test band 2",
+    "user_id": "user2@test.com",
+    "date_created": datetime.datetime.today(),
+}
+
 client = TestClient(app)
 
 

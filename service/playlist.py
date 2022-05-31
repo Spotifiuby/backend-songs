@@ -1,7 +1,9 @@
 from bson import ObjectId
 import pymongo
 import datetime
+
 from config.db import conn
+import service.artist
 
 
 def _playlist_entity(playlist) -> dict:

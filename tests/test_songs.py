@@ -56,7 +56,7 @@ def test_create_song(mongo_test):
 
 
 def test_get_all_songs(mongo_test_artist):
-    test_song = {"name": "test", "artists": ["test"], "genre": "rock"}
+    test_song = {"name": "test", "artists": [str(TEST_ARTIST['_id'])], "genre": "rock"}
     for i in range(10):
         client.post("/songs", json=test_song, headers={'x-user-id': TEST_ARTIST['user_id']})
     response = client.get("/songs")
@@ -96,7 +96,7 @@ def test_get_song(mongo_test):
     del json_response["date_created"]
     expected_response = TEST_SONG.copy()
     expected_response['id'] = str(expected_response['_id'])
-    expected_response['artists'] = [str(a) for a in expected_response['artists']]
+    expected_response['artists'] = [TEST_ARTIST['name']]
     del expected_response["_id"]
     del expected_response["date_created"]
     assert json_response == expected_response

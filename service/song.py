@@ -13,7 +13,7 @@ def _song_entity(song) -> dict:
     if not song:
         return song
     song["id"] = str(song.pop("_id"))
-    song["artists"] = [str(a) for a in song["artists"]]
+    song['artists'] = [str(artist_id) for artist_id in song['artists']]
     return song
 
 

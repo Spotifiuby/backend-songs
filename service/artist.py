@@ -33,12 +33,9 @@ def get(artist_id: str = None, user_id: str = None):
     return _artist_entity(artist)
 
 
-# def is_owner(artist_id, user_id):
-#     artist = conn.artists.find_one(ObjectId(artist_id))
-#     if not artist:
-#         return -1
-#     if artist['user_id'] != user_id:
-#         return -2
+def get_name(artist_id: str):
+    artist = conn.artists.find_one({"_id": ObjectId(artist_id)})
+    return artist['name']
 
 
 def create(name, user_id):

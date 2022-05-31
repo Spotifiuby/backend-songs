@@ -1,9 +1,11 @@
 import pytest
 from bson import ObjectId
 import datetime
-from main import app
 from fastapi.testclient import TestClient
+
+from main import app
 from config.db import conn
+from tests.test_artists import TEST_ARTIST, TEST_ARTIST_2
 
 client = TestClient(app)
 
@@ -11,7 +13,9 @@ TEST_SONG_1 = {
     "_id": ObjectId("625c9dcd232be00e5f827f6e"),
     "status": "active",
     "name": "test",
-    "artists": ["test"],
+    "artists": [
+        TEST_ARTIST['_id']
+    ],
     "date_created": datetime.datetime.today(),
     "date_uploaded": None
 }
@@ -20,7 +24,9 @@ TEST_SONG_2 = {
     "_id": ObjectId("625c9dcd232be00e5f827f6f"),
     "status": "active",
     "name": "test",
-    "artists": ["test"],
+    "artists": [
+        TEST_ARTIST['_id']
+    ],
     "date_created": datetime.datetime.today(),
     "date_uploaded": None
 }
@@ -29,7 +35,9 @@ TEST_SONG_3 = {
     "_id": ObjectId("625c9dcd232be00e5f827f7a"),
     "status": "active",
     "name": "test",
-    "artists": ["test"],
+    "artists": [
+        TEST_ARTIST['_id']
+    ],
     "date_created": datetime.datetime.today(),
     "date_uploaded": None
 }
@@ -38,7 +46,7 @@ TEST_ALBUM = {
     "_id": ObjectId("625c9dcd232be00e5f827f6a"),
     "name": "test_name",
     "artists": [
-        "test_artist"
+        TEST_ARTIST['_id']
     ],
     "songs": [
         str(TEST_SONG_1["_id"]),
@@ -58,6 +66,8 @@ def mongo_test_empty():
 
 @pytest.fixture()
 def mongo_test_songs(mongo_test_empty):
+    conn.artists.insert_one(TEST_ARTIST)
+    conn.artists.insert_one(TEST_ARTIST_2)
     conn.songs.insert_one(TEST_SONG_1)
     conn.songs.insert_one(TEST_SONG_2)
     conn.songs.insert_one(TEST_SONG_3)
@@ -77,13 +87,13 @@ def test_get_all_albums_empty(mongo_test_empty):
 def test_find_playlist(mongo_test_songs):
     test_album1 = {
         "name": "The Wall",
-        "artists": ["Pink Floyd"],
+        "artists": [str(TEST_ARTIST['_id'])],
         "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])],
         "year": 1979
     }
     test_album2 = {
         "name": "Revolver",
-        "artists": ["The Beatles"],
+        "artists": [str(TEST_ARTIST['_id'])],
         "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])],
         "year": 1966
     }
@@ -102,7 +112,7 @@ def test_find_playlist(mongo_test_songs):
 def test_create_album(mongo_test):
     test_album = {
         "name": "test",
-        "artists": ["test"],
+        "artists": [str(TEST_ARTIST['_id'])],
         "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])],
         "year": 1990
     }
@@ -110,13 +120,20 @@ def test_create_album(mongo_test):
     assert response.status_code == 201
     assert len(response.json()) > 0
     assert response.json()["name"] == test_album["name"]
-    assert response.json()["artists"] == test_album["artists"]
+    assert response.json()["artists"] == [str(TEST_ARTIST['_id'])]
     assert response.json()["songs"] == test_album["songs"]
     assert response.json()["year"] == test_album["year"]
 
 
 def test_get_all_albums(mongo_test_songs):
-    test_album = {"name": "test", "artists": ["test"], "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])], "year": 1990}
+    test_album = {
+        "name": "test",
+        "artists": [str(TEST_ARTIST['_id'])],
+        "songs": [
+            str(TEST_SONG_1["_id"]),
+            str(TEST_SONG_2["_id"])
+        ],
+        "year": 1990}
     for i in range(10):
         client.post("/albums", json=test_album)
     response = client.get("/albums")
@@ -138,6 +155,7 @@ def test_get_album(mongo_test):
     del json_response["date_created"]
     expected_response = TEST_ALBUM.copy()
     expected_response['id'] = str(expected_response['_id'])
+    expected_response['artists'] = [TEST_ARTIST['name']]
     del expected_response["_id"]
     del expected_response["date_created"]
     assert json_response == expected_response
@@ -166,18 +184,18 @@ def test_add_song_to_album_not_found_fails(mongo_test_songs):
 
 
 def test_add_artist(mongo_test):
-    new_artist = "new_artist"
-    response = client.put("/albums/{}/artists".format(str(TEST_ALBUM["_id"])), params={'artist': new_artist})
+    response = client.put("/albums/{}/artists".format(str(TEST_ALBUM["_id"])),
+                          params={'artist_id': TEST_ARTIST_2['_id']})
     assert response.status_code == 200
     json_response = response.json()
     expected_artists = TEST_ALBUM["artists"].copy()
-    expected_artists.append(new_artist)
-    assert json_response["artists"] == expected_artists
+    expected_artists.append(TEST_ARTIST_2['_id'])
+    assert json_response["artists"] == [str(a) for a in expected_artists]
 
 
 def test_add_artist_to_album_not_found_fails(mongo_test_empty):
-    new_artist = "new_artist"
-    response = client.put("/albums/{}/artists".format(str(TEST_ALBUM["_id"])), params={'artist': new_artist})
+    response = client.put("/albums/{}/artists".format(str(TEST_ALBUM["_id"])),
+                          params={'artist_id': TEST_ARTIST_2['_id']})
     assert response.status_code == 404
 
 

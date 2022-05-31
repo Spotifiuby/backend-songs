@@ -65,7 +65,7 @@ def test_get_content(mongo_test):
 
 
 def test_create_and_get_song_and_content(mongo_test):
-    test_song = {"name": "test", "artists": [], "genre": "rock"}
+    test_song = {"name": "test", "artists": [str(TEST_ARTIST['_id'])], "genre": "rock"}
     response = client.post("/songs", json=test_song, headers={'x-user-id': TEST_ARTIST['user_id']})
     assert response.status_code == 201
     assert len(response.json()) > 0
@@ -90,5 +90,5 @@ def test_create_and_get_song_and_content(mongo_test):
     del json_response["date_uploaded"]
     test_song['id'] = song_id
     test_song['status'] = 'active'
-    test_song['artists'] = [str(TEST_ARTIST['_id'])]
+    test_song['artists'] = [str(TEST_ARTIST['name'])]
     assert json_response == test_song
