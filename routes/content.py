@@ -2,7 +2,7 @@ from fastapi import APIRouter, Response, UploadFile, status, Depends, Header
 from typing import Optional
 
 from exceptions.content_exceptions import ContentNotFound
-from service.content import get_song_content, upload_song_content
+from service.content import get_song_content, upload_song_content, verify_download
 import service.song
 from utils.utils import validate_song, verify_api_key
 
@@ -18,6 +18,8 @@ async def get_content(response: Response,
     if authorization:
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
+    verify_download(x_user_id, song_id, authorization)
+
     contents = get_song_content(song_id)
     if contents:
         return Response(media_type="audio/mpeg", content=contents)
