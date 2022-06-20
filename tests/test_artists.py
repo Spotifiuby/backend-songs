@@ -9,6 +9,7 @@ TEST_ARTIST = {
     "_id": ObjectId("625c9dcd232be00e5f827f6a"),
     "name": "test band",
     "user_id": "user@test.com",
+    "subscription_level": 0,
     "date_created": datetime.datetime.today(),
 }
 
@@ -16,6 +17,7 @@ TEST_ARTIST_2 = {
     "_id": ObjectId("625c9dcd232be00e5f827f6b"),
     "name": "test band 2",
     "user_id": "user2@test.com",
+    "subscription_level": 0,
     "date_created": datetime.datetime.today(),
 }
 

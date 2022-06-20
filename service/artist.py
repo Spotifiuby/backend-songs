@@ -38,21 +38,27 @@ def get_name(artist_id: str):
     return artist['name']
 
 
-def create(name, user_id):
+def create(name, subscription_level, user_id):
     artist_dict = dict()
-    artist_dict["name"] = name
-    artist_dict["user_id"] = user_id
-    artist_dict["date_created"] = datetime.datetime.today()
+    artist_dict['name'] = name
+    artist_dict['user_id'] = user_id
+    artist_dict['subscription_level'] = subscription_level if subscription_level else 0
+    artist_dict['date_created'] = datetime.datetime.today()
     r = conn.artists.insert_one(artist_dict)
-    mongo_artist = conn.artists.find_one({"_id": r.inserted_id})
+    mongo_artist = conn.artists.find_one({'_id': r.inserted_id})
 
     return _artist_entity(mongo_artist)
 
 
-def update(artist_id, name):
+def update(artist_id, name=None, subscription_level=None):
+    artist = {}
+    if name:
+        artist['name'] = name
+    if subscription_level:
+        artist['subscription_level'] = subscription_level
     updated_artist = conn.artists.find_one_and_update(
         {"_id": ObjectId(artist_id)},
-        {"$set": {'name': name}},
+        {"$set": artist},
         return_document=pymongo.ReturnDocument.AFTER
     )
     return _artist_entity(updated_artist)

@@ -50,7 +50,7 @@ async def create_artist(response: Response,
     if not x_user_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="x_user_id is missing")
-    return service.artist.create(artist.name, x_user_id)
+    return service.artist.create(artist.name, artist.subscription_level, x_user_id)
 
 
 @artist_routes.put("/artists/{artist_id}", response_model=ArtistModel, tags=["Artists"])
@@ -65,7 +65,9 @@ async def update_artist(response: Response,
         response.headers['authorization'] = authorization
     log_request_body(x_request_id, artist)
     verify_api_key(x_api_key)
-    updated_artist = service.artist.update(artist_id, artist.name)
+    updated_artist = service.artist.update(artist_id,
+                                           name=artist.name,
+                                           subscription_level=artist.subscription_level)
     if not updated_artist:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Artist {artist_id} not found")
     return updated_artist
