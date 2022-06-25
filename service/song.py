@@ -43,8 +43,15 @@ def create(song, user_id):
     song_dict = song.dict()
     if "artists" not in song_dict or not song_dict["artists"]:
         song_dict["artists"] = []
+
+    for artist_id in song_dict["artists"]:
+        artist = service.artist.get(artist_id)
+        if not artist:
+            raise ArtistNotFoundForUser(user_id)
+
     if artist_id not in song_dict["artists"]:
         song_dict["artists"].insert(0, artist_id)
+
     song_dict["status"] = StatusEnum.not_uploaded
     song_dict["date_created"] = datetime.datetime.today()
     song_dict["date_uploaded"] = None

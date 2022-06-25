@@ -1,7 +1,9 @@
 from bson import ObjectId
 import pymongo
 import datetime
+
 from config.db import conn
+from utils.utils import check_valid_artist_id
 
 
 def _artist_entity(artist) -> dict:
@@ -27,6 +29,7 @@ def find(q):
 def get(artist_id: str = None, user_id: str = None):
     artist = None
     if artist_id:
+        check_valid_artist_id(artist_id)
         artist = conn.artists.find_one({"_id": ObjectId(artist_id)})
     elif user_id:
         artist = conn.artists.find_one({"user_id": user_id})
@@ -34,6 +37,7 @@ def get(artist_id: str = None, user_id: str = None):
 
 
 def get_name(artist_id: str):
+    print(type(artist_id), artist_id)
     artist = conn.artists.find_one({"_id": ObjectId(artist_id)})
     return artist['name']
 
