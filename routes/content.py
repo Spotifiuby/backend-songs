@@ -4,7 +4,7 @@ from typing import Optional
 from exceptions.content_exceptions import ContentNotFound
 from service.content import get_song_content, upload_song_content, verify_download
 import service.song
-from utils.utils import validate_song, verify_api_key
+from utils.utils import validate_song, verify_api_key, log_request_body
 
 content_routes = APIRouter()
 
@@ -12,9 +12,9 @@ content_routes = APIRouter()
 @content_routes.get("/songs/{song_id}/content", response_class=Response, tags=["Content"])
 async def get_content(response: Response,
                       song_id: str = Depends(validate_song),
+                      authorization: Optional[str] = Header(None),
                       x_user_id: Optional[str] = Header(None),
-                      x_api_key: Optional[str] = Header(None),
-                      authorization: Optional[str] = Header(None)):
+                      x_api_key: Optional[str] = Header(None)):
     if authorization:
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
@@ -33,9 +33,11 @@ async def post_content(response: Response,
                        file: UploadFile = None,
                        x_user_id: Optional[str] = Header(None),
                        x_api_key: Optional[str] = Header(None),
-                       authorization: Optional[str] = Header(None)):
+                       authorization: Optional[str] = Header(None),
+                       x_request_id: Optional[str] = Header(None)):
     if authorization:
         response.headers['authorization'] = authorization
+    log_request_body(x_request_id, {'headers': {'authorization': authorization, 'x_api_key': x_api_key, 'x_user_id': x_user_id}})
     verify_api_key(x_api_key)
     upload_song_content(song_id, await file.read())
     service.song.activate_song(song_id)
