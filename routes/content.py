@@ -14,9 +14,12 @@ async def get_content(response: Response,
                       song_id: str = Depends(validate_song),
                       authorization: Optional[str] = Header(None),
                       x_user_id: Optional[str] = Header(None),
-                      x_api_key: Optional[str] = Header(None)):
+                      x_api_key: Optional[str] = Header(None),
+                      x_request_id: Optional[str] = Header(None)):
+
     if authorization:
         response.headers['authorization'] = authorization
+    log_request_body(x_request_id, {'headers': {'authorization': authorization, 'x_api_key': x_api_key, 'x_user_id': x_user_id}})
     verify_api_key(x_api_key)
     verify_download(x_user_id, song_id, authorization)
 
