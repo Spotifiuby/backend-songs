@@ -71,19 +71,19 @@ def test_get_all_playlists_empty(mongo_test_empty):
 
 
 def test_create_playlist(mongo_test_full):
-    test_playlist = {"name": "test", "owner": "test_owner", "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])]}
-    response = client.post("/playlists", json=test_playlist)
+    test_playlist = {"name": "test", "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])]}
+    response = client.post("/playlists", json=test_playlist, headers={"x-user-id": TEST_PLAYLIST["owner"]})
     assert response.status_code == 201
     assert len(response.json()) > 0
     assert response.json()["name"] == test_playlist["name"]
-    assert response.json()["owner"] == test_playlist["owner"]
     assert response.json()["songs"] == test_playlist["songs"]
+    assert response.json()["owner"] == TEST_PLAYLIST["owner"]
 
 
 def test_get_all_playlists(mongo_test_songs):
-    test_playlist = {"name": "test", "owner": "test_owner", "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])]}
+    test_playlist = {"name": "test", "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])]}
     for i in range(10):
-        client.post("/playlists", json=test_playlist)
+        client.post("/playlists", json=test_playlist, headers={"x-user-id": TEST_PLAYLIST["owner"]})
     response = client.get("/playlists")
     assert response.status_code == 200
     assert len(response.json()) == 10
@@ -92,16 +92,14 @@ def test_get_all_playlists(mongo_test_songs):
 def test_find_playlist(mongo_test_songs):
     test_playlist1 = {
         "name": "rock nacional",
-        "owner": "owner1",
         "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])]
     }
     test_playlist2 = {
         "name": "punk rock",
-        "owner": "owner2",
         "songs": [str(TEST_SONG_1["_id"]), str(TEST_SONG_2["_id"])]
     }
-    client.post("/playlists", json=test_playlist1)
-    client.post("/playlists", json=test_playlist2)
+    client.post("/playlists", json=test_playlist1, headers={"x-user-id": TEST_PLAYLIST["owner"]})
+    client.post("/playlists", json=test_playlist2, headers={"x-user-id": TEST_PLAYLIST["owner"]})
     response1 = client.get("/playlists", params="q=rock")
     assert len(response1.json()) == 2
     response2 = client.get("/playlists", params="q=nacional")
@@ -133,25 +131,36 @@ def test_get_playlist(mongo_test_full):
 
 
 def test_add_song(mongo_test_full):
-    new_song = str(TEST_SONG_3["_id"])
-    response = client.put("/playlists/{}/songs".format(str(TEST_PLAYLIST["_id"])), params={'song': new_song})
+    new_songs = [str(TEST_SONG_3["_id"])]
+    response = client.post("/playlists/{}".format(str(TEST_PLAYLIST["_id"])), json={"songs": new_songs},
+                           headers={"x-user-id": TEST_PLAYLIST["owner"]})
     assert response.status_code == 200
     json_response = response.json()
     expected_songs = TEST_PLAYLIST["songs"].copy()
-    expected_songs.append(new_song)
+    expected_songs.extend(new_songs)
     assert json_response["songs"] == expected_songs
 
 
 def test_add_song_not_found_to_playlist_fails(mongo_test_empty):
-    new_song = str(TEST_SONG_3["_id"])
-    response = client.put("/playlists/{}/songs".format(str(TEST_PLAYLIST["_id"])), params={'song': new_song})
+    new_songs = [str(TEST_SONG_3["_id"])]
+    response = client.put("/playlists/{}".format(str(TEST_PLAYLIST["_id"])), json={'songs': new_songs})
     assert response.status_code == 404
 
 
 def test_add_song_to_playlist_not_found_fails(mongo_test_songs):
-    new_song = str(TEST_SONG_3["_id"])
-    response = client.put("/playlists/{}/songs".format(str(TEST_PLAYLIST["_id"])), params={'song': new_song})
+    new_songs = [str(TEST_SONG_3["_id"])]
+    response = client.put("/playlists/{}".format(str(TEST_PLAYLIST["_id"])), json={'songs': new_songs})
     assert response.status_code == 404
+
+
+def test_delete_song(mongo_test_full):
+    response = client.delete("/playlists/{}/delete/{}".format(str(TEST_PLAYLIST["_id"]),
+                                                              str(TEST_PLAYLIST["songs"][0])),
+                             headers={"x-user-id": TEST_PLAYLIST["owner"]})
+    assert response.status_code == 200
+    json_response = response.json()
+    expected_songs = TEST_PLAYLIST["songs"].copy()[1:]
+    assert json_response["songs"] == expected_songs
 
 
 def test_update_playlist(mongo_test_full):

@@ -3,7 +3,7 @@ import pymongo
 import datetime
 
 from config.db import conn
-import service.artist
+from exceptions.playlist_exceptions import PlaylistNotFound
 
 
 def _playlist_entity(playlist) -> dict:
@@ -15,6 +15,13 @@ def _playlist_entity(playlist) -> dict:
 
 def _regex_query(field, q):
     return {field: {'$regex': q, '$options': 'i'}}
+
+
+def is_owner(playlist_id, user_id):
+    playlist = conn.playlists.find_one({'_id': ObjectId(playlist_id)})
+    if not playlist:
+        raise PlaylistNotFound(playlist_id)
+    return playlist['owner'] == user_id
 
 
 def find(q):
@@ -31,19 +38,29 @@ def get(playlist_id: str):
     return _playlist_entity(playlist)
 
 
-def create(playlist):
+def create(playlist, owner):
     playlist_dict = playlist.dict()
     playlist_dict["date_created"] = datetime.datetime.today()
+    playlist_dict["owner"] = owner
     r = conn.playlists.insert_one(playlist_dict)
     mongo_playlist = conn.playlists.find_one({"_id": r.inserted_id})
 
     return _playlist_entity(mongo_playlist)
 
 
-def add_song(playlist_id, song):
+def add_songs(playlist_id, songs):
     updated_playlist = conn.playlists.find_one_and_update(
         {"_id": ObjectId(playlist_id)},
-        {"$push": {"songs": song}},
+        {"$push": {"songs": {"$each": songs}}},
+        return_document=pymongo.ReturnDocument.AFTER
+    )
+    return _playlist_entity(updated_playlist)
+
+
+def delete_song(playlist_id, song_id):
+    updated_playlist = conn.playlists.find_one_and_update(
+        {"_id": ObjectId(playlist_id)},
+        {"$pull": {"songs": song_id}},
         return_document=pymongo.ReturnDocument.AFTER
     )
     return _playlist_entity(updated_playlist)

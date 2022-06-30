@@ -1,11 +1,18 @@
 from fastapi import APIRouter, HTTPException, status, Header, Response
 from typing import Optional
 
-from models.playlist import PlaylistModel, CreatePlaylistRequest, UpdatePlaylistRequest
+from models.playlist import PlaylistModel, CreatePlaylistRequest, UpdatePlaylistRequest, AddSongsPlaylistRequest
 import service.playlist
 from utils.utils import log_request_body, validate_song, verify_api_key, check_valid_playlist_id
+from exceptions.playlist_exceptions import PlaylistNotOwnedByUser
+
 
 playlist_routes = APIRouter()
+
+
+def _verify_ownership(playlist_id, user_id):
+    if not service.playlist.is_owner(playlist_id, user_id):
+        raise PlaylistNotOwnedByUser(playlist_id, user_id)
 
 
 @playlist_routes.get("/playlists", response_model=list[PlaylistModel], tags=["Playlists"], status_code=status.HTTP_200_OK)
@@ -50,25 +57,49 @@ async def create_playlist(response: Response,
     for song in playlist.songs:
         validate_song(song)
     log_request_body(x_request_id, playlist)
-    return service.playlist.create(playlist)
+    return service.playlist.create(playlist, x_user_id)
 
 
-@playlist_routes.put("/playlists/{playlist_id}/songs", response_model=PlaylistModel, tags=["Playlists"])
-async def add_song(response: Response,
-                   playlist_id: str,
-                   song: str,
-                   x_request_id: Optional[str] = Header(None),
-                   x_user_id: Optional[str] = Header(None),
-                   x_api_key: Optional[str] = Header(None),
-                   authorization: Optional[str] = Header(None)):
+@playlist_routes.post("/playlists/{playlist_id}", response_model=PlaylistModel, tags=["Playlists"])
+async def add_songs(response: Response,
+                    playlist_id: str,
+                    songs: AddSongsPlaylistRequest,
+                    x_request_id: Optional[str] = Header(None),
+                    x_user_id: Optional[str] = Header(None),
+                    x_api_key: Optional[str] = Header(None),
+                    authorization: Optional[str] = Header(None)):
     if authorization:
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
     check_valid_playlist_id(playlist_id)
-    validate_song(song)
-    log_request_body(x_request_id, {"song": song})
+    _verify_ownership(playlist_id, x_user_id)
+    for song in songs.songs:
+        validate_song(song)
+    log_request_body(x_request_id, songs)
 
-    updated_playlist = service.playlist.add_song(playlist_id, song)
+    updated_playlist = service.playlist.add_songs(playlist_id, songs.songs)
+    if not updated_playlist:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Playlist {playlist_id} not found")
+
+    return updated_playlist
+
+
+@playlist_routes.delete("/playlists/{playlist_id}/delete/{song_id}", response_model=PlaylistModel, tags=["Playlists"])
+async def delete_song(response: Response,
+                      playlist_id: str,
+                      song_id: str,
+                      x_request_id: Optional[str] = Header(None),
+                      x_user_id: Optional[str] = Header(None),
+                      x_api_key: Optional[str] = Header(None),
+                      authorization: Optional[str] = Header(None)):
+    if authorization:
+        response.headers['authorization'] = authorization
+    verify_api_key(x_api_key)
+    check_valid_playlist_id(playlist_id)
+    _verify_ownership(playlist_id, x_user_id)
+    log_request_body(x_request_id, song_id)
+
+    updated_playlist = service.playlist.delete_song(playlist_id, song_id)
     if not updated_playlist:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Playlist {playlist_id} not found")
 

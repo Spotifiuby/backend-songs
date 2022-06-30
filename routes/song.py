@@ -1,11 +1,11 @@
 from fastapi import APIRouter, status, Header, Depends, Response
 from typing import Optional
 
-from utils.utils import log_request_body, check_valid_song_id, verify_api_key
-from utils.user import is_admin
 from models.song import SongModel, CreateSongRequest, UpdateSongRequest
 import service.song
 import service.artist
+from utils.utils import log_request_body, check_valid_song_id, verify_api_key
+from utils.user import is_admin
 from exceptions.song_exceptions import SongNotFound, SongNotOwnedByUser
 from exceptions.user_exceptions import MissingUserId
 
