@@ -21,12 +21,14 @@ def _regex_query(field, q):
     return {field: {'$regex': q, '$options': 'i'}}
 
 
-def find(q):
-    if not q:
-        mongo_query = {}
-    else:
+def find(q, artist_id):
+    mongo_query = {}
+    if q:
         fields = ['name', 'artists', 'genre']
         mongo_query = {'$or': [_regex_query(field, q) for field in fields]}
+    if artist_id:
+        mongo_query['artists'] = ObjectId(artist_id)
+
     return [_song_entity(song) for song in conn.songs.find(mongo_query)]
 
 
@@ -39,18 +41,20 @@ def create(song, user_id):
     artist = service.artist.get(user_id=user_id)
     if not artist:
         raise ArtistNotFoundForUser(user_id)
-    artist_id = artist['id']
+    user_artist_id = ObjectId(artist['id'])
     song_dict = song.dict()
     if "artists" not in song_dict or not song_dict["artists"]:
         song_dict["artists"] = []
+    else:
+        song_dict["artists"] = [ObjectId(a) for a in song_dict["artists"]]
 
     for artist_id in song_dict["artists"]:
         artist = service.artist.get(artist_id)
         if not artist:
             raise ArtistNotFoundForUser(user_id)
 
-    if artist_id not in song_dict["artists"]:
-        song_dict["artists"].insert(0, artist_id)
+    if user_artist_id not in song_dict["artists"]:
+        song_dict["artists"].insert(0, user_artist_id)
 
     song_dict["status"] = StatusEnum.not_uploaded
     song_dict["date_created"] = datetime.datetime.today()

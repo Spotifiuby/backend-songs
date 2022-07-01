@@ -17,12 +17,13 @@ def _regex_query(field, q):
     return {field: {'$regex': q, '$options': 'i'}}
 
 
-def find(q):
-    if not q:
-        mongo_query = {}
-    else:
+def find(q, artist_id):
+    mongo_query = {}
+    if q:
         fields = ['name']
         mongo_query = {'$or': [_regex_query(field, q) for field in fields]}
+    if artist_id:
+        mongo_query['artists'] = ObjectId(artist_id)
     return [_album_entity(song) for song in conn.albums.find(mongo_query)]
 
 
@@ -37,6 +38,7 @@ def get(album_id: str):
 def create(album):
     album_dict = album.dict()
     album_dict["date_created"] = datetime.datetime.today()
+    album_dict["artists"] = [ObjectId(a) for a in album_dict["artists"]]
     r = conn.albums.insert_one(album_dict)
     mongo_album = conn.albums.find_one({"_id": r.inserted_id})
 

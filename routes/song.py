@@ -26,13 +26,14 @@ def _verify_ownership(song_id, user_id):
 @song_routes.get("/songs", response_model=list[SongModel], tags=["Songs"], status_code=status.HTTP_200_OK)
 async def get_songs(response: Response,
                     q: Optional[str] = None,
+                    artist_id: Optional[str] = None,
                     x_user_id: Optional[str] = Header(None),
                     x_api_key: Optional[str] = Header(None),
                     authorization: Optional[str] = Header(None)):
     if authorization:
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
-    songs = service.song.find(q)
+    songs = service.song.find(q, artist_id)
     for song in songs:
         song['artists'] = [service.artist.get_name(artist_id) for artist_id in song['artists']]
     return songs

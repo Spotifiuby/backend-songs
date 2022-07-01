@@ -12,13 +12,14 @@ album_routes = APIRouter()
 @album_routes.get("/albums", response_model=list[AlbumModel], tags=["Albums"], status_code=status.HTTP_200_OK)
 async def get_albums(response: Response,
                      q: Optional[str] = None,
+                     artist_id: Optional[str] = None,
                      x_user_id: Optional[str] = Header(None),
                      x_api_key: Optional[str] = Header(None),
                      authorization: Optional[str] = Header(None)):
     if authorization:
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
-    albums = service.album.find(q)
+    albums = service.album.find(q, artist_id)
     for album in albums:
         album['artists'] = [service.artist.get_name(artist_id) for artist_id in album['artists']]
     return albums

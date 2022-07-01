@@ -37,7 +37,6 @@ def get(artist_id: str = None, user_id: str = None):
 
 
 def get_name(artist_id: str):
-    print(type(artist_id), artist_id)
     artist = conn.artists.find_one({"_id": ObjectId(artist_id)})
     return artist['name']
 
