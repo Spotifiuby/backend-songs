@@ -13,4 +13,7 @@ def is_admin(user_id, token_authorization):
     r = requests.get(f'https://spotifiuby-api-gateway.herokuapp.com/users-api/users/{user_id}',
                      headers={'x-api-key': x_api_key, 'Authorization': token_authorization})
     user = r.json()
-    return user['user_type'] == 'admin'
+    if 'user_type' in user:
+        return user['user_type'] == 'admin'
+    else:
+        return False
