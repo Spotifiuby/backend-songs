@@ -29,11 +29,11 @@ async def get_content(response: Response,
                 artist = service.artist.get(artist_id)
                 user_id = artist['user_id']
                 if artist['subscription_level'] == 1:
-                    price = "0.0000001"
+                    price = "0.00000005"
                 elif artist['subscription_level'] == 2:
-                    price = "0.0000002"
+                    price = "0.0000001"
                 elif artist['subscription_level'] == 3:
-                    price = "0.0000003"
+                    price = "0.00000015"
                 else:
                     continue
                 rBody = {
