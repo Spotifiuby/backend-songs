@@ -7,6 +7,7 @@ import service.song
 import service.artist
 from utils.utils import validate_song, verify_api_key, log_request_body
 import requests
+import os
 
 content_routes = APIRouter()
 
@@ -23,20 +24,23 @@ async def get_content(response: Response,
     if contents:
 
         song = service.song.get(song_id)
-        if song:
+        if song and os.getenv("CURRENT_ENVIRONMENT") == "production":
             for artist_id in song['artists']:
                 artist = service.artist.get(artist_id)
                 user_id = artist['user_id']
+                if artist['subscription_level'] == 1:
+                    price = "0.0000001"
+                elif artist['subscription_level'] == 2:
+                    price = "0.0000002"
+                elif artist['subscription_level'] == 3:
+                    price = "0.0000003"
+                else:
+                    continue
                 rBody = {
-                    "amountInEthers": str(price),
-                    "senderId": user_id,
+                    "artistId": user_id,
+                    "amountInEthers": price,
                     }
-                r = requests.post("https://spotifiuby-payment-service.herokuapp.com/deposit", json=rBody)
-        # song = service.song.get(song_id)
-        # if song is None:
-        #     raise SongNotFound(song_id)
-        # song['artists'] = [service.artist.get_name(artist_id) for artist_id in song['artists']]
-
+                r = requests.post("https://spotifiuby-payment-service.herokuapp.com/payment", json=rBody)
         return Response(media_type="audio/mpeg", content=contents)
     else:
         raise ContentNotFound(song_id)
