@@ -4,6 +4,7 @@ from typing import Optional
 from models.playlist import PlaylistModel, CreatePlaylistRequest, UpdatePlaylistRequest, AddSongsPlaylistRequest
 from models.song import SongModel
 import service.playlist
+import service.artist
 from utils.utils import log_request_body, validate_song, verify_api_key, check_valid_playlist_id
 from exceptions.playlist_exceptions import PlaylistNotOwnedByUser
 
@@ -58,6 +59,9 @@ async def get_playlist_songs(response: Response,
     playlist_songs = service.playlist.get_songs(playlist_id)
     if playlist_songs is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Playlist {playlist_id} not found")
+
+    for song in playlist_songs:
+        song['artists'] = [service.artist.get_name(artist_id) for artist_id in song['artists']]
 
     return playlist_songs
 

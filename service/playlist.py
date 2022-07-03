@@ -4,7 +4,7 @@ import datetime
 
 from config.db import conn
 from exceptions.playlist_exceptions import PlaylistNotFound
-from service.song import _song_entity
+import service.song
 
 
 def _playlist_entity(playlist) -> dict:
@@ -41,8 +41,7 @@ def get(playlist_id: str):
 
 def get_songs(playlist_id: str):
     playlist = conn.playlists.find_one({"_id": ObjectId(playlist_id)})
-    songs_ids = [ObjectId(song_id) for song_id in playlist['songs']]
-    songs = [_song_entity(song) for song in conn.songs.find({'_id': {'$in': songs_ids}})]
+    songs = [service.song.get(song_id) for song_id in playlist['songs']]
     return songs
 
 
