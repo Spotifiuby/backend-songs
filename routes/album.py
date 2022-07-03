@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Header, Depends, Response
 from typing import Optional
 
 from models.album import AlbumModel, CreateAlbumRequest, UpdateAlbumRequest
+from models.song import SongModel
 import service.album
 import service.artist
 from utils.utils import log_request_body, validate_song, check_valid_album_id, check_valid_artist_id, verify_api_key
@@ -39,6 +40,26 @@ async def get_album(response: Response,
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Album {album_id} not found")
     album['artists'] = [service.artist.get_name(artist_id) for artist_id in album['artists']]
     return album
+
+
+@album_routes.get("/albums/{album_id}/songs", response_model=list[SongModel], tags=["Albums"], status_code=status.HTTP_200_OK)
+async def get_album_songs(response: Response,
+                          album_id: str,
+                          x_user_id: Optional[str] = Header(None),
+                          x_api_key: Optional[str] = Header(None),
+                          authorization: Optional[str] = Header(None)):
+    if authorization:
+        response.headers['authorization'] = authorization
+    verify_api_key(x_api_key)
+    check_valid_album_id(album_id)
+    album_songs = service.album.get_songs(album_id)
+    if album_songs is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Album {album_id} not found")
+
+    for song in album_songs:
+        song['artists'] = [service.artist.get_name(artist_id) for artist_id in song['artists']]
+
+    return album_songs
 
 
 @album_routes.post("/albums", response_model=AlbumModel, tags=["Albums"], status_code=status.HTTP_201_CREATED)

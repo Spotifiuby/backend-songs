@@ -3,6 +3,7 @@ import pymongo
 import datetime
 
 from config.db import conn
+import service.song
 
 
 def _album_entity(album) -> dict:
@@ -33,6 +34,12 @@ def get(album_id: str):
         return _album_entity(album)
 
     return None
+
+
+def get_songs(album_id: str):
+    album = conn.albums.find_one({"_id": ObjectId(album_id)})
+    songs = [service.song.get(song_id) for song_id in album['songs']]
+    return songs
 
 
 def create(album):

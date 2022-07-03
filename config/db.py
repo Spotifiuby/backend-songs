@@ -22,7 +22,7 @@ else:
     conn = _client.testdb
 
 # Firebase
-if os.getenv("CURRENT_ENVIRONMENT") == "production":
+if not test:
     BUCKET = "spotifiuby-3c9fe.appspot.com"
     default_app = firebase_admin.initialize_app()
     storage_client = storage.Client()
