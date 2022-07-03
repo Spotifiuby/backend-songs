@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Header, Response
 from typing import Optional
 
 from models.playlist import PlaylistModel, CreatePlaylistRequest, UpdatePlaylistRequest, AddSongsPlaylistRequest
+from models.song import SongModel
 import service.playlist
 from utils.utils import log_request_body, validate_song, verify_api_key, check_valid_playlist_id
 from exceptions.playlist_exceptions import PlaylistNotOwnedByUser
@@ -42,6 +43,23 @@ async def get_playlist(response: Response,
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Playlist {playlist_id} not found")
 
     return playlist
+
+
+@playlist_routes.get("/playlists/{playlist_id}/songs", response_model=list[SongModel], tags=["Playlists"], status_code=status.HTTP_200_OK)
+async def get_playlist_songs(response: Response,
+                             playlist_id: str,
+                             x_user_id: Optional[str] = Header(None),
+                             x_api_key: Optional[str] = Header(None),
+                             authorization: Optional[str] = Header(None)):
+    if authorization:
+        response.headers['authorization'] = authorization
+    verify_api_key(x_api_key)
+    check_valid_playlist_id(playlist_id)
+    playlist_songs = service.playlist.get_songs(playlist_id)
+    if playlist_songs is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Playlist {playlist_id} not found")
+
+    return playlist_songs
 
 
 @playlist_routes.post("/playlists", response_model=PlaylistModel, tags=["Playlists"], status_code=status.HTTP_201_CREATED)

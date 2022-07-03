@@ -4,6 +4,7 @@ import datetime
 
 from config.db import conn
 from exceptions.playlist_exceptions import PlaylistNotFound
+from service.song import _song_entity
 
 
 def _playlist_entity(playlist) -> dict:
@@ -30,12 +31,19 @@ def find(q):
     else:
         fields = ['name', 'owner']
         mongo_query = {'$or': [_regex_query(field, q) for field in fields]}
-    return [_playlist_entity(song) for song in conn.playlists.find(mongo_query)]
+    return [_playlist_entity(playlist) for playlist in conn.playlists.find(mongo_query)]
 
 
 def get(playlist_id: str):
     playlist = conn.playlists.find_one({"_id": ObjectId(playlist_id)})
     return _playlist_entity(playlist)
+
+
+def get_songs(playlist_id: str):
+    playlist = conn.playlists.find_one({"_id": ObjectId(playlist_id)})
+    songs_ids = [ObjectId(song_id) for song_id in playlist['songs']]
+    songs = [_song_entity(song) for song in conn.songs.find({'_id': {'$in': songs_ids}})]
+    return songs
 
 
 def create(playlist, owner):
