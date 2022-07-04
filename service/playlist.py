@@ -49,6 +49,8 @@ def create(playlist, owner):
     playlist_dict = playlist.dict()
     playlist_dict["date_created"] = datetime.datetime.today()
     playlist_dict["owner"] = owner
+    if "cover" not in playlist_dict:
+        playlist_dict["cover"] = None
     r = conn.playlists.insert_one(playlist_dict)
     mongo_playlist = conn.playlists.find_one({"_id": r.inserted_id})
 

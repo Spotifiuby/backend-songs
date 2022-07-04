@@ -68,10 +68,6 @@ def get(song_id: str):
 
 
 def create(song, user_id):
-    artist = service.artist.get(user_id=user_id)
-    if not artist:
-        raise ArtistNotFoundForUser(user_id)
-    user_artist_id = ObjectId(artist['id'])
     song_dict = song.dict()
     if "artists" not in song_dict or not song_dict["artists"]:
         song_dict["artists"] = []
@@ -83,7 +79,11 @@ def create(song, user_id):
         if not artist:
             raise ArtistNotFoundForUser(user_id)
 
-    if user_artist_id not in song_dict["artists"]:
+    if len(song_dict["artists"]) == 0:
+        artist = service.artist.get(user_id=user_id)
+        if not artist:
+            raise ArtistNotFoundForUser(user_id)
+        user_artist_id = ObjectId(artist['id'])
         song_dict["artists"].insert(0, user_artist_id)
 
     song_dict["status"] = StatusEnum.not_uploaded
@@ -108,6 +108,8 @@ def is_owner(song_id, user_id):
 
 def update(song_id, song):
     to_update = {k: v for k, v in song.dict().items() if v is not None}
+    if "artists" in to_update:
+        to_update["artists"] = [ObjectId(artist_id) for artist_id in to_update["artists"]]
     updated_song = conn.songs.find_one_and_update(
         {"_id": ObjectId(song_id)},
         {"$set": to_update},

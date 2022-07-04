@@ -75,6 +75,8 @@ def create(album):
     album_dict = album.dict()
     album_dict["date_created"] = datetime.datetime.today()
     album_dict["artists"] = [ObjectId(a) for a in album_dict["artists"]]
+    if "cover" not in album_dict:
+        album_dict["cover"] = None
     r = conn.albums.insert_one(album_dict)
     mongo_album = conn.albums.find_one({"_id": r.inserted_id})
 
