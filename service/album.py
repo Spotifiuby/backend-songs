@@ -18,14 +18,43 @@ def _regex_query(field, q):
     return {field: {'$regex': q, '$options': 'i'}}
 
 
-def find(q, artist_id):
+def find(q: str = None, artist_id: str | ObjectId = None, songs_ids: list = None, subscription_level: int = None):
     mongo_query = {}
     if q:
-        fields = ['name']
+        fields = ['name', 'artists_names']
         mongo_query = {'$or': [_regex_query(field, q) for field in fields]}
     if artist_id:
         mongo_query['artists'] = ObjectId(artist_id)
-    return [_album_entity(song) for song in conn.albums.find(mongo_query)]
+    if subscription_level is not None:
+        mongo_query['subscription_level'] = {'$lte': subscription_level}
+    if songs_ids:
+        mongo_query['_id'] = {'$in': [ObjectId(song_id) for song_id in songs_ids]}
+
+    pipeline = [
+        {
+            '$lookup': {
+                'from': 'artists',
+                'localField': 'artists',
+                'foreignField': '_id',
+                'as': 'artists_data'
+            }
+        }, {
+            '$addFields': {
+                'subscription_level': {
+                    '$max': '$artists_data.subscription_level'
+                },
+                'artists_names': '$artists_data.name'
+            }
+        }, {
+            '$match': mongo_query
+        }, {
+            '$unset': [
+                'artists_data', 'artists_names', 'subscription_level'
+            ]
+        }
+    ]
+
+    return [_album_entity(song) for song in conn.albums.aggregate(pipeline)]
 
 
 def get(album_id: str):
@@ -36,9 +65,9 @@ def get(album_id: str):
     return None
 
 
-def get_songs(album_id: str):
+def get_songs(album_id: str, subscription_level: int):
     album = conn.albums.find_one({"_id": ObjectId(album_id)})
-    songs = [service.song.get(song_id) for song_id in album['songs']]
+    songs = service.song.find(songs_ids=album['songs'], subscription_level=subscription_level)
     return songs
 
 

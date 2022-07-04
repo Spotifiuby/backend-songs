@@ -4,7 +4,7 @@ from typing import Optional
 from models.song import SongModel, CreateSongRequest, UpdateSongRequest
 import service.song
 import service.artist
-from utils.utils import log_request_body, check_valid_song_id, verify_api_key
+from utils.utils import log_request_body, check_valid_song_id, verify_api_key, get_user_subscription
 from utils.user import is_admin
 from exceptions.song_exceptions import SongNotFound, SongNotOwnedByUser
 from exceptions.user_exceptions import MissingUserId
@@ -33,7 +33,7 @@ async def get_songs(response: Response,
     if authorization:
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
-    songs = service.song.find(q, artist_id)
+    songs = service.song.find(q, artist_id, subscription_level=get_user_subscription(x_user_id))
     for song in songs:
         song['artists'] = [service.artist.get_name(artist_id) for artist_id in song['artists']]
     return songs
@@ -103,5 +103,3 @@ async def delete_song(response: Response,
     r = service.song.delete(song_id)
     if not r:
         SongNotFound(song_id)
-
-

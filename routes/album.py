@@ -5,7 +5,7 @@ from models.album import AlbumModel, CreateAlbumRequest, UpdateAlbumRequest
 from models.song import SongModel
 import service.album
 import service.artist
-from utils.utils import log_request_body, validate_song, check_valid_album_id, check_valid_artist_id, verify_api_key
+from utils.utils import log_request_body, validate_song, check_valid_album_id, check_valid_artist_id, verify_api_key, get_user_subscription
 
 album_routes = APIRouter()
 
@@ -20,7 +20,7 @@ async def get_albums(response: Response,
     if authorization:
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
-    albums = service.album.find(q, artist_id)
+    albums = service.album.find(q, artist_id, subscription_level=get_user_subscription(x_user_id))
     for album in albums:
         album['artists'] = [service.artist.get_name(artist_id) for artist_id in album['artists']]
     return albums
@@ -52,7 +52,7 @@ async def get_album_songs(response: Response,
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
     check_valid_album_id(album_id)
-    album_songs = service.album.get_songs(album_id)
+    album_songs = service.album.get_songs(album_id, get_user_subscription(x_user_id))
     if album_songs is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Album {album_id} not found")
 

@@ -9,6 +9,7 @@ import os
 import service.song
 from exceptions.song_exceptions import SongNotFound, SongNotAvailable
 from models.song import SongModel
+from config.db import conn
 
 logger = logging.getLogger('main-logger')
 
@@ -64,3 +65,10 @@ def validate_song(song_id: str):
     if not _check_active_song(song):
         raise SongNotAvailable(song_id)
     return song_id
+
+
+def get_user_subscription(user_id):
+    user = conn.subscriptions.find_one({'user_id': user_id})
+    if not user:
+        return 0
+    return user['subscription_type_level']

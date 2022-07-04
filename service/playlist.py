@@ -39,9 +39,9 @@ def get(playlist_id: str):
     return _playlist_entity(playlist)
 
 
-def get_songs(playlist_id: str):
+def get_songs(playlist_id: str, subscription_level: int):
     playlist = conn.playlists.find_one({"_id": ObjectId(playlist_id)})
-    songs = [service.song.get(song_id) for song_id in playlist['songs']]
+    songs = service.song.find(songs_ids=playlist['songs'], subscription_level=subscription_level)
     return songs
 
 

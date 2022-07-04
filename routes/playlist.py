@@ -5,7 +5,7 @@ from models.playlist import PlaylistModel, CreatePlaylistRequest, UpdatePlaylist
 from models.song import SongModel
 import service.playlist
 import service.artist
-from utils.utils import log_request_body, validate_song, verify_api_key, check_valid_playlist_id
+from utils.utils import log_request_body, validate_song, verify_api_key, check_valid_playlist_id, get_user_subscription
 from exceptions.playlist_exceptions import PlaylistNotOwnedByUser
 
 
@@ -56,7 +56,7 @@ async def get_playlist_songs(response: Response,
         response.headers['authorization'] = authorization
     verify_api_key(x_api_key)
     check_valid_playlist_id(playlist_id)
-    playlist_songs = service.playlist.get_songs(playlist_id)
+    playlist_songs = service.playlist.get_songs(playlist_id, get_user_subscription(x_user_id))
     if playlist_songs is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Playlist {playlist_id} not found")
 
