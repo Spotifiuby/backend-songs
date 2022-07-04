@@ -11,6 +11,7 @@ def _album_entity(album) -> dict:
         return album
     album['id'] = str(album.pop('_id'))
     album['artists'] = [str(artist_id) for artist_id in album['artists']]
+    album['songs'] = [str(song_id) for song_id in album['songs']]
     return album
 
 
