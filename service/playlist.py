@@ -49,6 +49,7 @@ def create(playlist, owner):
     playlist_dict = playlist.dict()
     playlist_dict["date_created"] = datetime.datetime.today()
     playlist_dict["owner"] = owner
+    playlist_dict["songs"] = [ObjectId(song_id) for song_id in playlist_dict["songs"]]
     if "cover" not in playlist_dict:
         playlist_dict["cover"] = None
     r = conn.playlists.insert_one(playlist_dict)
@@ -77,6 +78,8 @@ def delete_song(playlist_id, song_id):
 
 def update(playlist_id, playlist):
     to_update = {k: v for k, v in playlist.dict().items() if v is not None}
+    if "songs" in to_update:
+        to_update["songs"] = [ObjectId(song_id) for song_id in to_update["songs"]]
     updated_playlist = conn.playlists.find_one_and_update(
         {"_id": ObjectId(playlist_id)},
         {"$set": to_update},

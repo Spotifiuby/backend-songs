@@ -74,6 +74,7 @@ def get_songs(album_id: str, subscription_level: int):
 def create(album):
     album_dict = album.dict()
     album_dict["date_created"] = datetime.datetime.today()
+    album_dict["songs"] = [ObjectId(song_id) for song_id in album_dict["songs"]]
     album_dict["artists"] = [ObjectId(a) for a in album_dict["artists"]]
     if "cover" not in album_dict:
         album_dict["cover"] = None
@@ -103,6 +104,10 @@ def add_artist(album_id, artist_id):
 
 def update(album_id, album):
     to_update = {k: v for k, v in album.dict().items() if v is not None}
+    if "artists" in to_update:
+        to_update["artists"] = [ObjectId(artist_id) for artist_id in to_update["artists"]]
+    if "songs" in to_update:
+        to_update["songs"] = [ObjectId(song_id) for song_id in to_update["songs"]]
     updated_album = conn.albums.find_one_and_update(
         {"_id": ObjectId(album_id)},
         {"$set": to_update},
