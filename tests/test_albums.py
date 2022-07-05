@@ -156,6 +156,7 @@ def test_get_album(mongo_test):
     expected_response = TEST_ALBUM.copy()
     expected_response['id'] = str(expected_response['_id'])
     expected_response['artists'] = [TEST_ARTIST['name']]
+    expected_response['cover'] = None
     del expected_response["_id"]
     del expected_response["date_created"]
     assert json_response == expected_response
@@ -200,7 +201,12 @@ def test_add_artist_to_album_not_found_fails(mongo_test_empty):
 
 
 def test_update_album(mongo_test):
-    updated_album = {"name": "updated_name", "artists": ["updated_artist"], "songs": [str(TEST_SONG_3["_id"])], "year": 2010}
+    updated_album = {
+        "name": "updated_name",
+        "artists": [str(TEST_ARTIST["_id"])],
+        "songs": [str(TEST_SONG_3["_id"])],
+        "year": 2010
+    }
     response = client.put("/albums/{}".format(str(TEST_ALBUM["_id"])), json=updated_album)
     assert response.status_code == 200
     assert len(response.json()) > 0

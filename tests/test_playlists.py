@@ -125,6 +125,7 @@ def test_get_playlist(mongo_test_full):
     del json_response["date_created"]
     expected_response = TEST_PLAYLIST.copy()
     expected_response['id'] = str(expected_response['_id'])
+    expected_response['cover'] = None
     del expected_response["_id"]
     del expected_response["date_created"]
     assert json_response == expected_response
