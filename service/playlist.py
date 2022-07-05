@@ -11,6 +11,7 @@ def _playlist_entity(playlist) -> dict:
     if not playlist:
         return playlist
     playlist["id"] = str(playlist.pop("_id"))
+    playlist["songs"] = [str(song_id) for song_id in playlist["songs"]]
     return playlist
 
 
